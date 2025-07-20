@@ -1,0 +1,27 @@
+{
+  "name": "hospital-billing-system",
+  "version": "2.0.0",
+  "description": "Comprehensive Hospital Billing System with IndexedDB storage",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js"
+  },
+  "keywords": [
+    "hospital",
+    "billing",
+    "medical",
+    "healthcare",
+    "indexeddb"
+  ],
+  "author": "Hospital Management System",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

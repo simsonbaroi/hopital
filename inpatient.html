@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Hospital Billing System - Inpatient</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Patient Form Styles */
+        .patient-form-section {
+            background: rgba(15, 26, 74, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 201, 167, 0.15);
+        }
+
+        .patient-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .patient-form-grid.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(0, 201, 167, 0.2);
+        }
+
+        .days-counter {
+            background: rgba(0, 201, 167, 0.1);
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+
+        .room-type-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .room-type-checkboxes {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .room-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .room-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--secondary);
+        }
+
+        .room-checkbox label {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .private-room-options {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 201, 167, 0.05);
+            border: 1px solid rgba(0, 201, 167, 0.2);
+            border-radius: 8px;
+        }
+
+        .room-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .room-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .room-option:hover {
+            background: rgba(0, 201, 167, 0.1);
+            border-color: var(--secondary);
+        }
+
+        .room-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--secondary);
+        }
+
+        .room-option label {
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .visitation-section {
+            margin-top: 20px;
+        }
+
+        .visitation-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Bill Preview Table Styles */
+        .bill-preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .bill-preview-table th,
+        .bill-preview-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .bill-preview-table th {
+            background: rgba(0, 201, 167, 0.2);
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .bill-preview-table td {
+            font-size: 13px;
+        }
+
+        .bill-preview-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .bill-preview-table tr:hover {
+            background: rgba(0, 201, 167, 0.05);
+        }
+
+        .amount-column {
+            text-align: right;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .code-column {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .subtotal-row {
+            background: rgba(0, 201, 167, 0.1) !important;
+            font-weight: 600;
+        }
+
+        .total-row {
+            background: rgba(0, 201, 167, 0.2) !important;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .payment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .date-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .date-input-container input[type="text"] {
+            padding-right: 40px !important;
+        }
+
+        .date-input-container button {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 4px;
+            z-index: 2;
+        }
+
+        .date-input-container button:hover {
+            color: white;
+        }
+
+        /* Hospital Header Styles */
+        .hospital-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(0, 201, 167, 0.1);
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 15px;
+        }
+
+        .hospital-header h2 {
+            color: var(--secondary);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .hospital-header p {
+            color: white;
+            margin: 5px 0;
+        }
+
+        /* Patient Info Preview Styles */
+        .patient-info-preview {
+            background: rgba(0, 201, 167, 0.05);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 201, 167, 0.15);
+        }
+
+        .patient-info-preview::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 201, 167, 0.5);
+        }
+
+        .info-grid-preview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item-preview:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 201, 167, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 201, 167, 0.2);
+        }
+
+        .info-label-preview {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value-preview {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: white;
+            word-break: break-word;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .patient-form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .room-type-checkboxes {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .room-selection-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .info-grid-preview {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .patient-info-preview {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .info-item-preview {
+                padding: 12px;
+            }
+
+            .info-value-preview {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .patient-info-preview {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .info-item-preview {
+                padding: 10px;
+            }
+
+            .info-label-preview {
+                font-size: 0.8rem;
+            }
+
+            .info-value-preview {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Geometric Background -->
+    <div class="geometric-bg">
+        <div class="triangle triangle-1"></div>
+        <div class="triangle triangle-2"></div>
+        <div class="triangle triangle-3"></div>
+        <div class="triangle triangle-4"></div>
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+    </div>
+
+    <!-- Navigation Toggle -->
+    <button class="side-nav-toggle" id="sideNavToggle" onclick="toggleSideNav()" title="Navigation Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Navigation Overlay -->
+    <div class="side-nav-overlay" id="sideNavOverlay" onclick="closeSideNav()"></div>
+
+    <!-- Navigation Panel -->
+    <div class="side-nav-panel" id="sideNavPanel">
+        <div class="side-nav-header">
+            <h5 class="side-nav-title">Navigation</h5>
+            <button class="side-nav-close" onclick="closeSideNav()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="side-nav-content">
+            <a href="landing.html" class="side-nav-item">
+                <i class="fas fa-home"></i>
+                <span>Main Portal</span>
+            </a>
+
+            <a href="index.html" class="side-nav-item">
+                <i class="fas fa-walking"></i>
+                <span>Outpatient System</span>
+            </a>
+
+            <a href="edit.html" class="side-nav-item">
+                <i class="fas fa-edit"></i>
+                <span>Edit Mode</span>
+            </a>
+
+            <div class="side-nav-divider"></div>
+
+            <div class="side-nav-item" onclick="showSystemInfo(); closeSideNav();">
+                <i class="fas fa-info-circle"></i>
+                <span>System Info</span>
+            </div>
+
+            <div class="side-nav-item" onclick="exportAllData(); closeSideNav();">
+                <i class="fas fa-download"></i>
+                <span>Export All Data</span>
+            </div>
+
+            <div class="side-nav-item danger" onclick="clearAllData(); closeSideNav();">
+                <i class="fas fa-trash"></i>
+                <span>Clear All Data</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-bed"></i>
+                <div>
+                    <h1>Inpatient Billing System<span class="inpatient-badge">Extended Care</span></h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="row g-4">
+                <!-- Left Column - Patient Information Form -->
+                <div class="col-lg-6">
+                    <div class="patient-form-section">
+                        <h4 style="color: var(--secondary); margin-bottom: 20px;">
+                            <i class="fas fa-user-plus me-2"></i>Patient Information
+                        </h4>
+
+                        <!-- Basic Patient Information -->
+                        <div class="patient-form-grid">
+                            <div class="form-group">
+                                <label for="patientName">Patient's Name</label>
+                                <input type="text" id="patientName" placeholder="Enter patient's full name" onchange="calculateTotalDays(); updateBillPreview();">
+                            </div>
+                            <div class="form-group">
+                                <label for="opdNumber">O.D. No.</label>
+                                <input type="text" id="opdNumber" placeholder="Enter OPD number" onchange="updateBillPreview();">
+                            </div>
+                        </div>
+
+                        <div class="patient-form-grid">
+                            <div class="form-group">
+                                <label for="hospitalNumber">Hospital No.</label>
+                                <input type="text" id="hospitalNumber" placeholder="Enter hospital number" onchange="updateBillPreview();">
+                            </div>
+                            <div class="form-group">
+                                <label for="billNumber">Bill No.</label>
+                                <input type="text" id="billNumber" placeholder="Auto-generated" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Admission and Discharge Dates -->
+                        <div class="patient-form-grid">
+                            <div class="form-group">
+                                <label for="admissionDate">Date Admitted (DD-MM-YYYY)</label>
+                                <div class="date-input-container">
+                                    <input type="date" id="admissionDate" onchange="calculateTotalDays(); updateBillPreview(); formatDateDisplay('admission');" style="display: none;">
+                                    <input type="text" id="admissionDateDisplay" placeholder="DD-MM-YYYY" maxlength="10" onchange="handleManualDateEntry('admission')" onclick="toggleDatePicker('admission')" style="padding: 12px; border: 1px solid rgba(0, 201, 167, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 14px; width: 100%; cursor: pointer;">
+                                    <button type="button" onclick="toggleDatePicker('admission')" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--secondary); cursor: pointer; padding: 4px;">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="dischargeDate">Date Discharged (DD-MM-YYYY) - Leave empty for billing date</label>
+                                <div class="date-input-container">
+                                    <input type="date" id="dischargeDate" onchange="calculateTotalDays(); updateBillPreview(); formatDateDisplay('discharge');" style="display: none;">
+                                    <input type="text" id="dischargeDateDisplay" placeholder="DD-MM-YYYY or leave empty" maxlength="10" onchange="handleManualDateEntry('discharge')" onclick="toggleDatePicker('discharge')" style="padding: 12px; border: 1px solid rgba(0, 201, 167, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 14px; width: 100%; cursor: pointer;">
+                                    <button type="button" onclick="toggleDatePicker('discharge')" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--secondary); cursor: pointer; padding: 4px;">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Days Counter -->
+                        <div class="patient-form-grid full-width">
+                            <div class="form-group">
+                                <label>Total Days Admitted</label>
+                                <div class="days-counter" id="totalDaysCounter">0 days</div>
+                            </div>
+                        </div>
+
+                        <!-- Room Type Selection -->
+                        <div class="room-type-section">
+                            <h5 style="color: var(--secondary); margin-bottom: 15px;">Room Type</h5>
+
+                            <div class="room-type-checkboxes">
+                                <div class="room-checkbox">
+                                    <input type="checkbox" id="generalRoom" onchange="handleRoomTypeChange('general')">
+                                    <label for="generalRoom">General Bed</label>
+                                </div>
+                                <div class="room-checkbox">
+                                    <input type="checkbox" id="privateRoom" onchange="handleRoomTypeChange('private')">
+                                    <label for="privateRoom">Private</label>
+                                </div>
+                            </div>
+
+                            <!-- Private Room Options -->
+                            <div class="private-room-options" id="privateRoomOptions">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h6 style="color: var(--secondary); margin: 0;">Select Private Room</h6>
+                                    <button type="button" onclick="reloadPrivateRooms()" 
+                                            style="background: rgba(0, 201, 167, 0.2); border: 1px solid rgba(0, 201, 167, 0.5); border-radius: 4px; padding: 4px 8px; color: var(--secondary); font-size: 12px; cursor: pointer;">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                                <div class="room-selection-grid" id="privateRoomGrid">
+                                    <!-- Private rooms will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Visitation Section -->
+                            <div class="visitation-section">
+                                <h6 style="color: var(--secondary); margin-bottom: 15px;">Visitation</h6>
+                                <div class="visitation-input">
+                                    <label for="totalVisitations" style="color: white; font-weight: 500;">Total Visitations:</label>
+                                    <input type="number" id="totalVisitations" min="0" value="0" style="width: 100px;" onchange="updateBillPreview();">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Bill Preview -->
+                <div class="col-lg-6">
+                    <div class="preview-section">
+                        <!-- Hospital Header -->
+                        <div class="hospital-header">
+                            <h2>Memorial Christian Hospital</h2>
+                            <p>P.O. Malumghat Hospital</p>
+                            <p>District Cox's Bazar</p>
+                        </div>
+
+                        <!-- Patient Info Display -->
+                        <div class="patient-info-preview">
+                            <div class="info-grid-preview">
+                                <div class="info-item-preview">
+                                    <span class="info-label-preview">Patient's Name</span>
+                                    <span class="info-value-preview" id="previewPatientName">_____________________</span>
+                                </div>
+                                <div class="info-item-preview">
+                                    <span class="info-label-preview">O.D. Number</span>
+                                    <span class="info-value-preview" id="previewOPDNo">_____________________</span>
+                                </div>
+                                <div class="info-item-preview">
+                                    <span class="info-label-preview">Date Admitted</span>
+                                    <span class="info-value-preview" id="previewAdmissionDate">_____________________</span>
+                                </div>
+                                <div class="info-item-preview">
+                                    <span class="info-label-preview">Date Discharged</span>
+                                    <span class="info-value-preview" id="previewDischargeDate">_____________________</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bill Table -->
+                        <table class="bill-preview-table" id="billPreviewTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Description</th>
+                                    <th style="width: 20%; text-align: center;">Amount</th>
+                                    <th style="width: 30%; text-align: center;">Code</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billTableBody">
+                                <tr>
+                                    <td>Blood</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50303</td>
+                                </tr>
+                                <tr>
+                                    <td>Laboratory</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50303</td>
+                                </tr>
+                                <tr>
+                                    <td>Limb and Brace</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50304</td>
+                                </tr>
+                                <tr>
+                                    <td>Food</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50319</td>
+                                </tr>
+                                <tr>
+                                    <td>Halo, O2, NO2, etc.</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50319</td>
+                                </tr>
+                                <tr>
+                                    <td>Orthopedic, S. Roll, etc.</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50306</td>
+                                </tr>
+                                <tr>
+                                    <td>Surgery, O.R. & Delivery</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50306</td>
+                                </tr>
+                                <tr>
+                                    <td>Registration fees</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50307</td>
+                                </tr>
+                                <tr>
+                                    <td>Discharge Medicine</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50308</td>
+                                </tr>
+                                <tr>
+                                    <td>Medicine, ORS & Anesthesia, Ket, Spinal</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50308</td>
+                                </tr>
+                                <tr>
+                                    <td>Physical Therapy</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50309</td>
+                                </tr>
+                                <tr>
+                                    <td>I.V.'s</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50310</td>
+                                </tr>
+                                <tr>
+                                    <td>Plaster/Milk</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50310</td>
+                                </tr>
+                                <tr>
+                                    <td>Procedures</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50310</td>
+                                </tr>
+                                <tr id="seatAdFeeRow">
+                                    <td><strong>Seat & Ad. Fee</strong></td>
+                                    <td class="amount-column"><strong id="seatAdFeeAmount">0.00</strong></td>
+                                    <td class="code-column">50313</td>
+                                </tr>
+                                <tr>
+                                    <td>X-Ray</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50315</td>
+                                </tr>
+                                <tr>
+                                    <td>Lost Laundry</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50310</td>
+                                </tr>
+                                <tr>
+                                    <td>Travel</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">20901</td>
+                                </tr>
+                                <tr>
+                                    <td>Other</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50317</td>
+                                </tr>
+                                <tr class="subtotal-row">
+                                    <td><strong>Sub. Total Bill</strong></td>
+                                    <td class="amount-column"><strong id="subTotalAmount">0.00</strong></td>
+                                    <td class="code-column"></td>
+                                </tr>
+                                <tr>
+                                    <td>Ancillary</td>
+                                    <td class="amount-column">0.00</td>
+                                    <td class="code-column">50311</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td><strong>Total Bill</strong></td>
+                                    <td class="amount-column"><strong id="totalBillAmount">0.00</strong></td>
+                                    <td class="code-column"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        
+
+                        <!-- Export Actions -->
+                        <div class="export-container" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
+                            <button type="button" class="export-button btn-glow" onclick="exportBillPDF()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-file-pdf" style="color: #ff6b6b;"></i>
+                                <span>Export PDF</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="exportExcel()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-file-excel" style="color: #51cf66;"></i>
+                                <span>Export Excel</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="printBill()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-print" style="color: #4dabf7;"></i>
+                                <span>Print Bill</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow danger" onclick="clearBill()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-trash"></i>
+                                <span>Clear All</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quick Navigation Section -->
+    <div class="quick-navigation-section">
+        <div class="container-fluid">
+            <div class="quick-nav-container">
+                <a href="index.html" class="quick-nav-btn">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Outpatient</span>
+                </a>
+                <a href="inpatient.html" class="quick-nav-btn active">
+                    <i class="fas fa-bed"></i>
+                    <span>Inpatient</span>
+                </a>
+                <a href="edit.html" class="quick-nav-btn">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Hospital Billing System - Inpatient Management Module. All rights reserved.</p>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="local-database.js"></script>
+    <script src="database-api.js"></script>
+    <script src="inpatient-app.js"></script>
+
+    <script>
+        // Global variables
+        let privateRooms = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            generateBillNumber();
+            setCurrentDate();
+            loadPrivateRooms();
+        });
+
+        // Generate unique bill number
+        function generateBillNumber() {
+            const billNumber = 'IP-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-6);
+            const billNumberElement = document.getElementById('billNumber');
+            if (billNumberElement) {
+                billNumberElement.value = billNumber;
+            }
+        }
+
+        // Set current date
+        function setCurrentDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const previewDateElement = document.getElementById('previewBillDate');
+            if (previewDateElement) {
+                previewDateElement.textContent = today;
+            }
+        }
+
+        // Load private rooms from database
+        async function loadPrivateRooms() {
+            try {
+                if (window.dbAPI) {
+                    console.log('Loading private rooms from Bed/Cabin Charges...');
+                    const bedCabinItems = await window.dbAPI.getItemsByCategory('Bed/Cabin Charges');
+                    
+                    // Filter for private room items
+                    privateRooms = bedCabinItems
+                        .filter(item => {
+                            const roomType = item.roomType?.toLowerCase() || '';
+                            const name = item.name?.toLowerCase() || '';
+                            return roomType === 'private' || name.includes('private');
+                        })
+                        .map(item => ({
+                            id: item.id,
+                            name: item.privateType || item.name || 'Private Room',
+                            price: parseFloat(item.dailyRate) || parseFloat(item.price) || 0,
+                            roomType: item.roomType,
+                            privateType: item.privateType,
+                            babySeat: item.babySeat,
+                            bedChargeOptions: item.bedChargeOptions,
+                            originalItem: item
+                        }));
+                    
+                    console.log(`Found ${privateRooms.length} private rooms:`, privateRooms);
+                    populatePrivateRooms();
+                } else {
+                    // No database available
+                    privateRooms = [];
+                    populatePrivateRooms();
+                }
+            } catch (error) {
+                console.error('Error loading private rooms:', error);
+                showToast('Error loading private rooms', 'warning');
+            }
+        }
+
+        // Function to reload private rooms (called by refresh button)
+        async function reloadPrivateRooms() {
+            showToast('Refreshing private rooms...', 'info');
+            await loadPrivateRooms();
+            showToast('Private rooms refreshed', 'success');
+        }
+
+        // Populate private rooms checkboxes
+        function populatePrivateRooms() {
+            const grid = document.getElementById('privateRoomGrid');
+            grid.innerHTML = '';
+
+            if (privateRooms.length === 0) {
+                grid.innerHTML = `
+                    <div class="room-option" style="text-align: center; color: #888; font-style: italic; grid-column: 1 / -1;">
+                        No private rooms available. Add them in the Database Editor under "Bed/Cabin Charges" category.
+                        <br><a href="edit.html" style="color: var(--secondary); text-decoration: underline;">Go to Database Editor</a>
+                    </div>
+                `;
+                return;
+            }
+
+            privateRooms.forEach(room => {
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-option';
+                
+                const price = room.price > 0 ? `৳${room.price}/day` : 'Price not set';
+                let roomLabel = room.name || 'Unnamed Room';
+                
+                // Add baby seat info if available
+                if (room.babySeat && room.babySeat.enabled && room.babySeat.price > 0) {
+                    roomLabel += ` + Baby Seat (৳${room.babySeat.price}/day)`;
+                }
+                
+                roomDiv.innerHTML = `
+                    <input type="checkbox" id="room_${room.id}" value="${room.id}" onchange="handlePrivateRoomChange()">
+                    <label for="room_${room.id}">${roomLabel} - ${price}</label>
+                `;
+                grid.appendChild(roomDiv);
+            });
+
+            console.log(`Populated ${privateRooms.length} private room options`);
+        }
+
+        // Handle room type change
+        function handleRoomTypeChange(type) {
+            const generalCheckbox = document.getElementById('generalRoom');
+            const privateCheckbox = document.getElementById('privateRoom');
+            const privateOptions = document.getElementById('privateRoomOptions');
+
+            if (type === 'general') {
+                if (generalCheckbox.checked) {
+                    privateCheckbox.checked = false;
+                    privateOptions.style.display = 'none';
+                    // Clear private room selections
+                    document.querySelectorAll('#privateRoomGrid input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
+                }
+            } else if (type === 'private') {
+                if (privateCheckbox.checked) {
+                    generalCheckbox.checked = false;
+                    privateOptions.style.display = 'block';
+                } else {
+                    privateOptions.style.display = 'none';
+                }
+            }
+
+            updateBillPreview();
+        }
+
+        // Handle private room selection
+        function handlePrivateRoomChange() {
+            updateBillPreview();
+        }
+
+        // Calculate total days between admission and discharge
+        function calculateTotalDays() {
+            const admissionDate = document.getElementById('admissionDate').value;
+            const dischargeDate = document.getElementById('dischargeDate').value;
+            const counter = document.getElementById('totalDaysCounter');
+
+            if (admissionDate && dischargeDate) {
+                const admission = new Date(admissionDate);
+                const discharge = new Date(dischargeDate);
+                const timeDiff = discharge.getTime() - admission.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                if (daysDiff > 0) {
+                    counter.textContent = daysDiff + ' days';
+                    counter.setAttribute('data-days', daysDiff);
+                } else {
+                    counter.textContent = '0 days';
+                    counter.setAttribute('data-days', 0);
+                }
+            } else {
+                counter.textContent = '0 days';
+                counter.setAttribute('data-days', 0);
+            }
+        }
+
+        // Update bill preview with calculations
+        function updateBillPreview() {
+            // Update patient information display with null checks
+            const previewPatientName = document.getElementById('previewPatientName');
+            const previewOPDNo = document.getElementById('previewOPDNo');
+            const previewAdmissionDate = document.getElementById('previewAdmissionDate');
+            const previewDischargeDate = document.getElementById('previewDischargeDate');
+            
+            const patientNameInput = document.getElementById('patientName');
+            const hospitalNumberInput = document.getElementById('hospitalNumber');
+            const opdNumberInput = document.getElementById('opdNumber');
+            const billNumberInput = document.getElementById('billNumber');
+            const admissionDateInput = document.getElementById('admissionDate');
+            const dischargeDateInput = document.getElementById('dischargeDate');
+
+            if (previewPatientName && patientNameInput) {
+                previewPatientName.textContent = patientNameInput.value || '_____________________';
+            }
+            if (previewOPDNo && opdNumberInput) {
+                previewOPDNo.textContent = opdNumberInput.value || '_____________________';
+            }
+            if (previewAdmissionDate && admissionDateInput) {
+                previewAdmissionDate.textContent = admissionDateInput.value || '_____________________';
+            }
+            if (previewDischargeDate && dischargeDateInput) {
+                previewDischargeDate.textContent = dischargeDateInput.value || '_____________________';
+            }
+
+            // Use the main calculation function from inpatient-app.js
+            if (window.updateBillPreview && window.updateBillPreview !== updateBillPreview) {
+                window.updateBillPreview();
+            }
+        }
+
+        // Export functions
+        function exportBillPDF() {
+            const element = document.querySelector('.preview-section');
+            const opt = {
+                margin: 1,
+                filename: 'inpatient-bill.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function exportExcel() {
+            showToast('Excel export feature coming soon', 'info');
+        }
+
+        function printBill() {
+            window.print();
+        }
+
+        function clearBill() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.getElementById('patientName').value = '';
+                document.getElementById('opdNumber').value = '';
+                document.getElementById('hospitalNumber').value = '';
+                document.getElementById('admissionDate').value = '';
+                document.getElementById('dischargeDate').value = '';
+                document.getElementById('totalVisitations').value = '0';
+                document.getElementById('generalRoom').checked = false;
+                document.getElementById('privateRoom').checked = false;
+                document.getElementById('privateRoomOptions').style.display = 'none';
+                document.querySelectorAll('#privateRoomGrid input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+
+                calculateTotalDays();
+                updateBillPreview();
+                generateBillNumber();
+
+                showToast('Bill cleared successfully', 'success');
+            }
+        }
+
+        // Navigation functions
+        function toggleSideNav() {
+            const panel = document.getElementById('sideNavPanel');
+            const overlay = document.getElementById('sideNavOverlay');
+            const toggle = document.getElementById('sideNavToggle');
+
+            if (panel && overlay && toggle) {
+                panel.classList.toggle('active');
+                overlay.classList.toggle('active');
+                toggle.classList.toggle('active');
+            }
+        }
+
+        function closeSideNav() {
+            const panel = document.getElementById('sideNavPanel');
+            const overlay = document.getElementById('sideNavOverlay');
+            const toggle = document.getElementById('sideNavToggle');
+
+            if (panel && overlay && toggle) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                toggle.classList.remove('active');
+            }
+        }
+
+        // Utility functions
+        function showToast(message, type = 'info') {
+            try {
+                const toast = document.createElement('div');
+                toast.className = `toast text-bg-${type}`;
+                toast.setAttribute('role', 'alert');
+                toast.innerHTML = `
+                    <div class="toast-body">
+                        ${message}
+                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                `;
+
+                const container = document.querySelector('.toast-container');
+                if (container) {
+                    container.appendChild(toast);
+
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                        const bsToast = new bootstrap.Toast(toast);
+                        bsToast.show();
+
+                        toast.addEventListener('hidden.bs.toast', () => {
+                            if (toast.parentNode) {
+                                toast.remove();
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error showing toast:', error);
+            }
+        }
+
+        function showSystemInfo() {
+            showToast('System info feature available in main application', 'info');
+        }
+
+        function exportAllData() {
+            showToast('Export feature available in main application', 'info');
+        }
+
+        function clearAllData() {
+            showToast('Database management available in main application', 'info');
+        }
+
+        console.log('Inpatient billing system loaded successfully');
+    </script>
+</body>
+</html>

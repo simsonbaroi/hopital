@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Hospital Billing System - Main Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Landing Page Specific Styles */
+        .landing-container {
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .landing-main {
+            flex: 1;
+            display: flex;
+            padding: 0;
+        }
+
+        .patient-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            min-height: 50vh;
+            min-height: 50dvh; /* Dynamic viewport height */
+            touch-action: manipulation; /* Optimize for touch */
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+        }
+
+        .patient-section:hover,
+        .patient-section:active {
+            transform: scale(1.02);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Touch feedback for mobile */
+        .patient-section:active {
+            transform: scale(0.98);
+        }
+
+        .outpatient-section {
+            background: linear-gradient(135deg, rgba(15, 26, 74, 0.95) 0%, rgba(26, 42, 108, 0.95) 50%, rgba(0, 201, 167, 0.2) 100%);
+            border-right: 3px solid var(--secondary);
+        }
+
+        .inpatient-section {
+            background: linear-gradient(135deg, rgba(0, 201, 167, 0.2) 0%, rgba(26, 42, 108, 0.95) 50%, rgba(15, 26, 74, 0.95) 100%);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .section-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 201, 167, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .outpatient-section .section-icon {
+            background: linear-gradient(135deg, var(--secondary), #00d8b4);
+            color: var(--dark);
+        }
+
+        .inpatient-section .section-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .patient-section:hover .section-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(0, 201, 167, 0.5);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            text-align: center;
+        }
+
+        .section-description {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-width: 300px;
+            text-align: center;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            padding: 0 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .section-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .section-features li {
+            padding: 8px 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .section-features li i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .section-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 201, 167, 0.3);
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 201, 167, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .inpatient-section .section-badge {
+            background: rgba(0, 201, 167, 0.3);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 201, 167, 0.3);
+        }
+
+        .divider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(0, 201, 167, 0.3) 10%, 
+                rgba(0, 201, 167, 0.8) 50%, 
+                rgba(0, 201, 167, 0.3) 90%, 
+                transparent 100%);
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0, 201, 167, 0.4);
+        }
+
+        /* Header for landing page */
+        .landing-header {
+            background: rgba(15, 26, 74, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 5%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-bottom: 2px solid var(--secondary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .landing-header .logo h1 {
+            font-size: 1.8rem;
+            margin-bottom: 3px;
+        }
+
+        .landing-header .logo p {
+            display: block;
+            font-size: 0.8rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        /* Mobile header adjustments */
+        @media (max-width: 768px) {
+            .landing-header {
+                padding: 8px 12px;
+            }
+
+            .landing-header .logo h1 {
+                font-size: 1.4rem;
+                margin-bottom: 1px;
+            }
+
+            .landing-header .logo p {
+                font-size: 0.7rem;
+            }
+
+            .nav-buttons .nav-button {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .landing-header .logo h1 {
+                font-size: 1.3rem;
+            }
+
+            .landing-header .logo p {
+                display: none; /* Hide subtitle on very small screens */
+            }
+
+            .nav-buttons .nav-button {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+
+            .nav-buttons .nav-button span {
+                display: none; /* Show only icon on small screens */
+            }
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .landing-main {
+                flex-direction: column;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+
+            .patient-section {
+                padding: 20px 15px;
+                min-height: 45vh;
+                min-height: 45dvh;
+            }
+
+            .outpatient-section {
+                border-right: none;
+                border-bottom: 3px solid var(--secondary);
+            }
+
+            .inpatient-section {
+                border-left: none;
+                border-top: 3px solid var(--secondary);
+            }
+
+            .divider {
+                top: 50%;
+                left: 0;
+                transform: translateY(-50%);
+                width: 100%;
+                height: 2px;
+                background: linear-gradient(to right, 
+                    transparent 0%, 
+                    rgba(0, 201, 167, 0.3) 10%, 
+                    rgba(0, 201, 167, 0.8) 50%, 
+                    rgba(0, 201, 167, 0.3) 90%, 
+                    transparent 100%);
+            }
+
+            .section-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+                margin-bottom: 12px;
+            }
+
+            .section-description {
+                font-size: 0.8rem;
+                margin-bottom: 12px;
+                max-width: 250px;
+                line-height: 1.3;
+                padding: 0 10px;
+            }
+
+            .section-badge {
+                position: static;
+                margin-bottom: 15px;
+                display: inline-block;
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+
+            .section-features {
+                margin-top: 10px;
+            }
+
+            .section-features li {
+                padding: 3px 0;
+                font-size: 0.75rem;
+                line-height: 1.2;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .patient-section {
+                padding: 15px 8px;
+            }
+
+            .section-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 5px;
+            }
+
+            .section-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+            }
+
+            .section-description {
+                font-size: 0.7rem;
+                max-width: 240px;
+                line-height: 1.2;
+                margin-bottom: 10px;
+                padding: 0 5px;
+            }
+
+            .section-features li {
+                font-size: 0.7rem;
+                gap: 5px;
+                padding: 2px 0;
+                line-height: 1.1;
+            }
+
+            .section-features li i {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Android-specific optimizations */
+        @media (max-width: 430px) {
+            .landing-header {
+                padding: 6px 10px;
+            }
+
+            .landing-header .logo h1 {
+                font-size: 1.3rem;
+            }
+
+            .patient-section {
+                padding: 12px 6px;
+                justify-content: center;
+                min-height: 42vh;
+                min-height: 42dvh;
+            }
+
+            .section-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 1.6rem;
+                margin-bottom: 6px;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+                margin-bottom: 4px;
+            }
+
+            .section-subtitle {
+                font-size: 0.8rem;
+                margin-bottom: 6px;
+            }
+
+            .section-description {
+                font-size: 0.65rem;
+                margin-bottom: 8px;
+                line-height: 1.15;
+                max-width: 220px;
+                padding: 0 3px;
+            }
+
+            .section-features li {
+                font-size: 0.65rem;
+                padding: 1px 0;
+                line-height: 1.1;
+                gap: 4px;
+            }
+
+            .section-features li i {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Landscape orientation optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .landing-main {
+                flex-direction: row;
+            }
+
+            .patient-section {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .section-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+                margin-bottom: 8px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 5px;
+            }
+
+            .section-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .section-description {
+                font-size: 0.75rem;
+                margin-bottom: 10px;
+                max-width: 220px;
+            }
+
+            .section-features {
+                display: none; /* Hide features in landscape to save space */
+            }
+
+            .outpatient-section {
+                border-bottom: none;
+                border-right: 3px solid var(--secondary);
+            }
+
+            .inpatient-section {
+                border-top: none;
+                border-left: 3px solid var(--secondary);
+            }
+
+            .divider {
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 2px;
+                height: 100%;
+                background: linear-gradient(to bottom, 
+                    transparent 0%, 
+                    rgba(0, 201, 167, 0.3) 10%, 
+                    rgba(0, 201, 167, 0.8) 50%, 
+                    rgba(0, 201, 167, 0.3) 90%, 
+                    transparent 100%);
+            }
+        }
+
+        /* Animation enhancements */
+        .patient-section {
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .outpatient-section {
+            animation-delay: 0.1s;
+        }
+
+        .inpatient-section {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Floating elements for visual enhancement */
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element-1 {
+            top: 20%;
+            left: 10%;
+            font-size: 2rem;
+            animation-delay: 0s;
+        }
+
+        .floating-element-2 {
+            bottom: 30%;
+            right: 15%;
+            font-size: 1.5rem;
+            animation-delay: 2s;
+        }
+
+        .floating-element-3 {
+            top: 60%;
+            left: 20%;
+            font-size: 1.8rem;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Added style for floating admin panel button */
+        .admin-panel-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(15, 26, 74, 0.95);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .admin-panel-button:hover {
+            background-color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Geometric Background -->
+    <div class="geometric-bg">
+        <div class="triangle triangle-1"></div>
+        <div class="triangle triangle-2"></div>
+        <div class="triangle triangle-3"></div>
+        <div class="triangle triangle-4"></div>
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+    </div>
+
+    <div class="landing-container">
+        <!-- Main Content -->
+        <main class="landing-main">
+            <div class="divider"></div>
+
+            <!-- Outpatient Section -->
+            <a href="index.html" class="patient-section outpatient-section">
+                <div class="section-badge">Active</div>
+
+                <!-- Floating elements -->
+                <i class="fas fa-user-md floating-element floating-element-1"></i>
+                <i class="fas fa-prescription-bottle floating-element floating-element-2"></i>
+                <i class="fas fa-notes-medical floating-element floating-element-3"></i>
+
+                <div class="section-icon">
+                    <i class="fas fa-walking"></i>
+                </div>
+
+                <h2 class="section-title">Outpatient</h2>
+                <p class="section-subtitle">Quick Visit Billing</p>
+
+                <p class="section-description">
+                    Streamlined billing system for outpatient visits, consultations, and same-day procedures. 
+                    Perfect for clinics and day-care medical services.
+                </p>
+
+                <ul class="section-features">
+                    <li><i class="fas fa-check-circle"></i> Quick Registration & Billing</li>
+                    <li><i class="fas fa-prescription"></i> Medicine & Lab Tests</li>
+                    <li><i class="fas fa-print"></i> Instant Receipt Generation</li>
+                    <li><i class="fas fa-clock"></i> Fast Checkout Process</li>
+                </ul>
+            </a>
+
+            <!-- Inpatient Section -->
+            <a href="inpatient.html" class="patient-section inpatient-section">
+                <div class="section-badge">Active</div>
+
+                <!-- Floating elements -->
+                <i class="fas fa-bed floating-element floating-element-1"></i>
+                <i class="fas fa-heart-pulse floating-element floating-element-2"></i>
+                <i class="fas fa-hospital-user floating-element floating-element-3"></i>
+
+                <div class="section-icon">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+
+                <h2 class="section-title">Inpatient</h2>
+                <p class="section-subtitle">Hospital Stay Billing</p>
+
+                <p class="section-description">
+                    Comprehensive billing system for inpatient stays, room charges, and extended care. 
+                    Perfect for hospital admissions and multi-day treatments.
+                </p>
+
+                <ul class="section-features">
+                    <li><i class="fas fa-check-circle"></i> Room Charge Management</li>
+                    <li><i class="fas fa-prescription"></i> Extended Care Services</li>
+                    <li><i class="fas fa-print"></i> Comprehensive Bill Generation</li>
+                    <li><i class="fas fa-cogs"></i> Multi-day Stay Support</li>
+                </ul>
+            </a>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer" style="padding: 15px 0; font-size: 12px;">
+            <p>&copy; 2025 Hospital Billing System. All rights reserved.</p>
+        </footer>
+
+        <!-- Floating Admin Panel Button -->
+        <a href="edit.html" class="admin-panel-button">
+            <i class="fas fa-cog"></i> Admin Panel
+        </a>
+    </div>
+
+    <script>
+        console.log('Landing page loaded successfully');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Landing page DOM loaded successfully');
+
+            // Add subtle animations to navigation cards
+            const cards = document.querySelectorAll('.patient-section');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>

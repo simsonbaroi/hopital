@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Billing System - Database Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Database Scripts -->
+    <script src="database-api.js"></script>
+</head>
+<body>
+    <!-- Geometric Background -->
+    <div class="geometric-bg">
+        <div class="triangle triangle-1"></div>
+        <div class="triangle triangle-2"></div>
+        <div class="triangle triangle-3"></div>
+        <div class="triangle triangle-4"></div>
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <i class="theme-toggle-icon fas fa-moon" id="themeIcon"></i>
+        <span class="theme-toggle-text" id="themeText">Dark</span>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <div>
+                    <h1>Database Editor</h1>
+                    <p>Advanced Category & Pricing Management</p>
+                </div>
+            </div>
+            <nav class="nav-buttons">
+                <!-- Navigation buttons removed -->
+            </nav>
+        </div>
+    </header>
+
+    <!-- Side Navigation Toggle -->
+    <div class="side-nav-toggle" onclick="toggleSideNav()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Side Navigation Overlay -->
+    <div class="side-nav-overlay" onclick="closeSideNav()"></div>
+
+    <!-- Side Navigation Panel -->
+    <div class="side-nav-panel">
+        <div class="side-nav-header">
+            <h6 class="side-nav-title">Navigation</h6>
+            <div class="side-nav-close" onclick="closeSideNav()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="side-nav-content">
+            <a href="index.html" class="side-nav-item">
+                <i class="fas fa-home"></i>
+                <span>Outpatient</span>
+            </a>
+            <a href="inpatient.html" class="side-nav-item">
+                <i class="fas fa-bed"></i>
+                <span>Inpatient</span>
+            </a>
+            <a href="edit.html" class="side-nav-item primary">
+                <i class="fas fa-edit"></i>
+                <span>Database</span>
+            </a>
+            <div class="side-nav-divider"></div>
+            <a href="landing.html" class="side-nav-item">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Landing</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2><i class="fas fa-edit me-3"></i>Advanced Database Management</h2>
+                <p>Manage categories, subcategories, items, and pricing structures</p>
+            </div>
+
+            <!-- Management Mode Tabs -->
+            <div class="management-tabs mb-4">
+                <ul class="nav nav-pills nav-fill" id="managementTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="category-management-tab" data-bs-toggle="pill" data-bs-target="#category-management" type="button" role="tab">
+                            <i class="fas fa-layer-group me-2"></i>Categories
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="item-management-tab" data-bs-toggle="pill" data-bs-target="#item-management" type="button" role="tab">
+                            <i class="fas fa-boxes me-2"></i>Items
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pricing-management-tab" data-bs-toggle="pill" data-bs-target="#pricing-management" type="button" role="tab">
+                            <i class="fas fa-dollar-sign me-2"></i>Pricing
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="managementTabContent">
+
+                <!-- Category Management Tab -->
+                <div class="tab-pane fade show active" id="category-management" role="tabpanel">
+
+                    <!-- Category Tree View -->
+                    <div class="category-tree-section mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="section-title">
+                                <i class="fas fa-sitemap me-2"></i>Category Hierarchy
+                            </h4>
+                            <button class="btn btn-primary" onclick="addNewCategory()">
+                                <i class="fas fa-plus me-2"></i>Add Main Category
+                            </button>
+                        </div>
+
+                        <div class="category-tree" id="categoryTree">
+                            <!-- Category tree will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Category Actions -->
+                    <div class="category-actions mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-tools me-2"></i>Category Actions
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="action-card">
+                                    <h6><i class="fas fa-edit me-2"></i>Rename Category</h6>
+                                    <select class="form-select mb-2" id="renameCategorySelect">
+                                        <option value="">Select category to rename...</option>
+                                    </select>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="newCategoryName" placeholder="New category name">
+                                        <button class="btn btn-outline-primary" onclick="renameCategory()">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="action-card">
+                                    <h6><i class="fas fa-plus me-2"></i>Add Subcategory</h6>
+                                    <select class="form-select mb-2" id="parentCategorySelect">
+                                        <option value="">Select parent category...</option>
+                                    </select>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="subcategoryName" placeholder="Subcategory name">
+                                        <button class="btn btn-outline-success" onclick="addSubcategory()">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item Management Tab -->
+                <div class="tab-pane fade" id="item-management" role="tabpanel">
+
+                    <!-- Category Selection for Items -->
+                    <div class="item-category-selection mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-layer-group me-2"></i>Select Category for Item Management
+                        </h4>
+
+                        <div class="category-grid-container">
+                            <div class="category-buttons-grid" id="itemCategoryGrid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; width: 100%;">
+                            <!-- Categories will be populated dynamically by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Add Item Form -->
+                    <div id="itemForm" style="display: none;" class="add-item-section">
+                        <div class="form-header">
+                            <h5 id="addItemTitle">
+                                <i class="fas fa-plus-circle me-2"></i>Add New Item
+                            </h5>
+                        </div>
+
+                        <!-- Dynamic Item Fields -->
+                        <div id="dynamicItemFields">
+                            <!-- Fields will be generated based on category type -->
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions mt-4">
+                            <button type="button" class="btn btn-glow me-3" onclick="addItem()">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Item</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <i class="fas fa-refresh"></i>
+                                <span>Reset</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="quickSetupBtn" 
+                                    onclick="setupQuickItems()" style="display: none;">
+                                <i class="fas fa-magic"></i>
+                                <span>Quick Setup Items</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Items Display -->
+                    <div id="itemsDisplaySection" style="display: none;" class="mt-4">
+                        <div class="category-info-header mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 style="color: var(--secondary); margin: 0;">
+                                    <i class="fas fa-list me-2"></i>Items in Category
+                                </h5>
+                                <div class="item-count-badge">
+                                    <span id="itemCount">0 items</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Items State -->
+                        <div id="noItemsInCategory" style="display: none;" class="text-center py-5">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary); opacity: 0.5;"></i>
+                            <h5 class="mt-3" style="color: var(--secondary);">No items in this category</h5>
+                            <p style="color: rgba(255,255,255,0.7);">Add your first item using the form above</p>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div id="itemsTableContainer" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr id="tableHeaders">
+                                            <!-- Headers will be generated dynamically -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemTable">
+                                        <!-- Items will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Category Management Actions -->
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-outline-warning me-2" onclick="clearCategory()">
+                                    <i class="fas fa-trash-alt me-2"></i>Clear Category
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Management Tab -->
+                <div class="tab-pane fade" id="pricing-management" role="tabpanel">
+
+                    <!-- Bulk Pricing Operations -->
+                    <div class="pricing-operations mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-calculator me-2"></i>Pricing Operations
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="action-card">
+                                    <h6><i class="fas fa-percentage me-2"></i>Bulk Price Adjustment</h6>
+                                    <select class="form-select mb-2" id="pricingCategorySelect">
+                                        <option value="">Select category...</option>
+                                    </select>
+                                    <div class="row g-2">
+                                        <div class="col-8">
+                                            <input type="number" class="form-control" id="priceAdjustment" placeholder="Adjustment %" step="0.1">
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-outline-primary w-100" onclick="adjustCategoryPricing()">
+                                                <i class="fas fa-calculator"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="action-card">
+                                    <h6><i class="fas fa-copy me-2"></i>Copy Pricing Structure</h6>
+                                    <select class="form-select mb-2" id="sourceCategorySelect">
+                                        <option value="">Source category...</option>
+                                    </select>
+                                    <select class="form-select mb-2" id="targetCategorySelect">
+                                        <option value="">Target category...</option>
+                                    </select>
+                                    <button class="btn btn-outline-success w-100" onclick="copyPricingStructure()">
+                                        <i class="fas fa-copy me-2"></i>Copy Prices
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Templates -->
+                    <div class="pricing-templates mb-4">
+                        <h5 class="section-title">
+                            <i class="fas fa-template me-2"></i>Pricing Templates
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="template-card" onclick="applyPricingTemplate('basic')">
+                                    <i class="fas fa-star"></i>
+                                    <h6>Basic Healthcare</h6>
+                                    <p>Standard pricing for basic services</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="template-card" onclick="applyPricingTemplate('premium')">
+                                    <i class="fas fa-crown"></i>
+                                    <h6>Premium Services</h6>
+                                    <p>Higher pricing for premium care</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="template-card" onclick="applyPricingTemplate('emergency')">
+                                    <i class="fas fa-bolt"></i>
+                                    <h6>Emergency Care</h6>
+                                    <p>Emergency service pricing</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Category Selected State -->
+            <div id="noCategorySelected" class="text-center py-5" style="display: none;">
+                <i class="fas fa-arrow-up" style="font-size: 3rem; color: var(--secondary); opacity: 0.5;"></i>
+                <h5 class="mt-3" style="color: var(--secondary);">Select a category above to start editing</h5>
+                <p style="color: rgba(255,255,255,0.7);">Choose from the options to view and manage items in that category</p>
+            </div>
+
+            <!-- Management Tools -->
+            <div class="management-tools mt-5">
+                <h5 class="section-title">
+                    <i class="fas fa-tools me-2"></i>Database Management Tools
+                </h5>
+
+                <div class="category-buttons-grid">
+                    <div class="export-button" onclick="exportDatabase()">
+                        <i class="fas fa-download" style="color: #69db7c;"></i>
+                        <span>Export Database</span>
+                    </div>
+                    <div class="export-button" onclick="triggerImportFile()">
+                        <i class="fas fa-upload" style="color: #74c0fc;"></i>
+                        <span>Import Data</span>
+                    </div>
+                    <div class="export-button" onclick="cleanupDuplicates()">
+                        <i class="fas fa-broom" style="color: #ffd43b;"></i>
+                        <span>Cleanup Duplicates</span>
+                    </div>
+                    <div class="export-button" onclick="exportCategoryStructure()">
+                        <i class="fas fa-sitemap" style="color: #51cf66;"></i>
+                        <span>Export Structure</span>
+                    </div>
+                    <div class="export-button" onclick="clearAndSetupBedCabinCharges()">
+                        <i class="fas fa-bed" style="color: #ff8cc8;"></i>
+                        <span>Setup Bed/Cabin</span>
+                    </div>
+                    <div class="export-button" onclick="showO2ISOModal()">
+                        <i class="fas fa-lungs" style="color: #4dabf7;"></i>
+                        <span>O2, ISO</span>
+                    </div>
+                    <div class="export-button danger" onclick="clearAllDatabase()">
+                        <i class="fas fa-trash" style="color: #ff6b6b;"></i>
+                        <span>Clear All Data</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quick Navigation Section -->
+    <div class="quick-navigation-section">
+        <div class="container-fluid">
+            <div class="quick-nav-container">
+                <a href="index.html" class="quick-nav-btn">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Outpatient</span>
+                </a>
+                <a href="inpatient.html" class="quick-nav-btn">
+                    <i class="fas fa-bed"></i>
+                    <span>Inpatient</span>
+                </a>
+                <a href="edit.html" class="quick-nav-btn active">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 Hospital Billing System. Advanced Database Management with Hierarchical Categories.</p>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add New Category</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCategoryForm">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryIcon" class="form-label">Icon (FontAwesome class)</label>
+                            <input type="text" class="form-control" id="categoryIcon" placeholder="fas fa-pills">
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryColor" class="form-label">Color</label>
+                            <input type="color" class="form-control" id="categoryColor" value="#74c0fc">
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryType" class="form-label">Category Type</label>
+                            <select class="form-select" id="categoryType">
+                                <option value="standard">Standard Items</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="xray">X-ray Services</option>
+                                <option value="room">Room Services</option>
+                                <option value="procedure">Procedures</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategoryModal()">Add Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for imports -->
+    <input type="file" id="fileInput" style="display: none;" accept=".json,.xlsx,.xls">
+
+    <!-- O2, ISO Modal -->
+    <div class="modal fade" id="o2ISOModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-lungs me-2"></i>O2, ISO Configuration</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Default System Rates:</strong> O2: 2L/hour at ৳130 | ISO: ৳30/minute
+                    </div>
+                    <form id="o2ISOForm">
+                        <div class="mb-4">
+                            <h6 class="text-secondary mb-3"><i class="fas fa-wind me-2"></i>O2 Configuration</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="o2BaseHour" class="form-label">O2 Per Hour <small class="text-muted">(Default: 1 hour)</small></label>
+                                    <input type="number" class="form-control" id="o2BaseHour" step="0.01" min="0" placeholder="1">
+                                    <small class="form-text text-muted">Enter 1 for per hour pricing</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="o2BaseRate" class="form-label">O2 Rate (৳) <small class="text-muted">(Default: ৳130)</small></label>
+                                    <input type="number" class="form-control" id="o2BaseRate" step="0.01" min="0" placeholder="130">
+                                    <small class="form-text text-muted">Rate for 2L oxygen per hour</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-secondary mb-3"><i class="fas fa-lungs me-2"></i>ISO Configuration</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="isoBaseHour" class="form-label">ISO Per Minute <small class="text-muted">(Default: 0.0167 hour)</small></label>
+                                    <input type="number" class="form-control" id="isoBaseHour" step="0.0001" min="0" placeholder="0.0167">
+                                    <small class="form-text text-muted">0.0167 = 1 minute in hours</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="isoBaseRate" class="form-label">ISO Rate (৳) <small class="text-muted">(Default: ৳30)</small></label>
+                                    <input type="number" class="form-control" id="isoBaseRate" step="0.01" min="0" placeholder="30">
+                                    <small class="form-text text-muted">Rate per minute</small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveO2ISOEntry()">Add to Database</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+            <p class="mt-3" style="color: white;">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="local-database.js"></script>
+    <script src="database-api.js"></script>
+    <script src="edit-app.js"></script>
+
+    <script>
+        // Side navigation functionality
+        function toggleSideNav() {
+            const overlay = document.querySelector('.side-nav-overlay');
+            const panel = document.querySelector('.side-nav-panel');
+
+            if (overlay && panel) {
+                overlay.classList.add('active');
+                panel.classList.add('active');
+            }
+        }
+
+        function closeSideNav() {
+            const overlay = document.querySelector('.side-nav-overlay');
+            const panel = document.querySelector('.side-nav-panel');
+
+            if (overlay && panel) {
+                overlay.classList.remove('active');
+                panel.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+    <script>
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const themeToggle = document.getElementById('themeToggle');
+
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            // Update theme
+            body.setAttribute('data-theme', newTheme);
+
+            // Update toggle button
+            if (newTheme === 'light') {
+                themeIcon.className = 'theme-toggle-icon fas fa-sun';
+                themeText.textContent = 'Light';
+                themeToggle.classList.remove('dark-mode');
+                themeToggle.classList.add('light-mode');
+            } else {
+                themeIcon.className = 'theme-toggle-icon fas fa-moon';
+                themeText.textContent = 'Dark';
+                themeToggle.classList.remove('light-mode');
+                themeToggle.classList.add('dark-mode');
+            }
+
+            // Save preference
+            localStorage.setItem('hospital-theme', newTheme);
+
+            // Show toast if function exists
+            if (typeof showToast === 'function') {
+                showToast(`Switched to ${newTheme} mode`, 'success');
+            }
+        }
+
+        // Initialize theme on page load
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('hospital-theme') || 'dark';
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const themeToggle = document.getElementById('themeToggle');
+
+            body.setAttribute('data-theme', savedTheme);
+
+            if (savedTheme === 'light') {
+                themeIcon.className = 'theme-toggle-icon fas fa-sun';
+                themeText.textContent = 'Light';
+                themeToggle.classList.add('light-mode');
+            } else {
+                themeIcon.className = 'theme-toggle-icon fas fa-moon';
+                themeText.textContent = 'Dark';
+                themeToggle.classList.add('dark-mode');
+            }
+        }
+
+        // Initialize theme when DOM loads
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+    </script>

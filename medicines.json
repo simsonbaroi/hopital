@@ -1,0 +1,341 @@
+[
+  {
+    "category": "Registration",
+    "name": "General Registration",
+    "price": 50.00,
+    "id": 101
+  },
+  {
+    "category": "Registration",
+    "name": "Emergency Registration",
+    "price": 100.00,
+    "id": 102
+  },
+  {
+    "category": "Registration",
+    "name": "Specialist Registration",
+    "price": 150.00,
+    "id": 103
+  },
+  {
+    "category": "Registration",
+    "name": "VIP Registration",
+    "price": 300.00,
+    "id": 104
+  },
+  {
+    "category": "Dr. Fee",
+    "name": "Consultation Fee - General",
+    "price": 500.00,
+    "id": 105
+  },
+  {
+    "category": "Dr. Fee",
+    "name": "Consultation Fee - Specialist",
+    "price": 800.00,
+    "id": 106
+  },
+  {
+    "category": "Dr. Fee",
+    "name": "Follow-up Visit",
+    "price": 300.00,
+    "id": 107
+  },
+  {
+    "category": "Dr. Fee",
+    "name": "Emergency Consultation",
+    "price": 1000.00,
+    "id": 108
+  },
+  {
+    "category": "Medic Fee",
+    "name": "Nursing Care - Basic",
+    "price": 200.00,
+    "id": 109
+  },
+  {
+    "category": "Medic Fee",
+    "name": "Nursing Care - Intensive",
+    "price": 400.00,
+    "id": 110
+  },
+  {
+    "category": "Medic Fee",
+    "name": "Medical Assistant Fee",
+    "price": 150.00,
+    "id": 111
+  },
+  {
+    "category": "Visitation",
+    "name": "Room Visit - General Ward",
+    "price": 100.00,
+    "id": 112
+  },
+  {
+    "category": "Visitation",
+    "name": "Room Visit - Private Room",
+    "price": 200.00,
+    "id": 113
+  },
+  {
+    "category": "Visitation General",
+    "name": "ICU Visit - General",
+    "type": "ICU",
+    "price": 300.00,
+    "id": 114
+  },
+  {
+    "category": "Visitation Private",
+    "name": "Private Room Visit - Standard",
+    "type": "Standard Private",
+    "price": 200.00,
+    "id": 115
+  },
+  {
+    "category": "Visitation Private",
+    "name": "Private Room Visit - Deluxe",
+    "type": "Deluxe Private",
+    "price": 250.00,
+    "id": 116
+  },
+  {
+    "category": "Visitation Private",
+    "name": "Private Room Visit - VIP",
+    "type": "VIP Private",
+    "price": 350.00,
+    "id": 117
+  },
+  {
+    "category": "Seat & Ad. Fee General",
+    "name": "General Ward Admission Fee",
+    "type": "Admission Fee",
+    "price": 500.00,
+    "id": 118
+  },
+  {
+    "category": "Seat & Ad. Fee General",
+    "name": "General Ward Bed - Standard",
+    "type": "Daily Bed Charge",
+    "price": 300.00,
+    "id": 119
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "Private Room Admission Fee - Standard",
+    "type": "Admission Fee",
+    "price": 1500.00,
+    "id": 120
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "Private Bed - Standard Room",
+    "type": "Daily Bed Charge",
+    "price": 1200.00,
+    "id": 121
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "Private Bed - Deluxe Room",
+    "type": "Daily Bed Charge",
+    "price": 1500.00,
+    "id": 122
+  },
+  {
+    "category": "Lab",
+    "name": "Complete Blood Count (CBC)",
+    "price": 300.00,
+    "id": 201
+  },
+  {
+    "category": "Lab",
+    "name": "Blood Sugar Test",
+    "price": 80.00,
+    "id": 202
+  },
+  {
+    "category": "Lab",
+    "name": "Urine Test",
+    "price": 120.00,
+    "id": 203
+  },
+  {
+    "category": "Lab",
+    "name": "Liver Function Test",
+    "price": 250.00,
+    "id": 204
+  },
+  {
+    "category": "Lab",
+    "name": "Kidney Function Test",
+    "price": 280.00,
+    "id": 205
+  },
+  {
+    "category": "OR",
+    "name": "Minor Surgery",
+    "price": 5000.00,
+    "id": 301
+  },
+  {
+    "category": "OR",
+    "name": "Major Surgery",
+    "price": 15000.00,
+    "id": 302
+  },
+  {
+    "category": "OR",
+    "name": "Emergency Surgery",
+    "price": 20000.00,
+    "id": 303
+  },
+  {
+    "category": "Medicine",
+    "name": "Paracetamol 500mg",
+    "type": "Tablet",
+    "strength": "500mg",
+    "price": 2.00,
+    "id": 350
+  },
+  {
+    "category": "Medicine",
+    "name": "Amoxicillin 250mg",
+    "type": "Capsule",
+    "strength": "250mg",
+    "price": 5.00,
+    "id": 351
+  },
+  {
+    "category": "Medicine",
+    "name": "Omeprazole 20mg",
+    "type": "Capsule",
+    "strength": "20mg",
+    "price": 8.00,
+    "id": 352
+  },
+  {
+    "category": "Procedure",
+    "name": "Consultation",
+    "price": 500.00,
+    "id": 401
+  },
+  {
+    "category": "Procedure",
+    "name": "Dressing",
+    "price": 200.00,
+    "id": 402
+  },
+  {
+    "category": "Procedure",
+    "name": "Injection",
+    "price": 150.00,
+    "id": 403
+  },
+  {
+    "category": "X-ray",
+    "name": "Chest X-ray",
+    "price": 400.00,
+    "id": 501
+  },
+  {
+    "category": "X-ray",
+    "name": "Abdominal X-ray",
+    "price": 450.00,
+    "id": 502
+  },
+  {
+    "category": "X-ray",
+    "name": "Bone X-ray",
+    "price": 350.00,
+    "id": 503
+  },
+  {
+    "category": "Seat & Ad. Fee",
+    "name": "Standard Seat",
+    "price": 100.00,
+    "id": 601
+  },
+  {
+    "category": "Seat & Ad. Fee",
+    "name": "Premium Seat",
+    "price": 200.00,
+    "id": 602
+  },
+  {
+    "category": "Seat & Ad. Fee",
+    "name": "Administration Fee",
+    "price": 50.00,
+    "id": 603
+  },
+  {
+    "category": "(O2, Halo, NO2 Etc.)",
+    "name": "Oxygen Therapy",
+    "price": 300.00,
+    "id": 701
+  },
+  {
+    "category": "(O2, Halo, NO2 Etc.)",
+    "name": "Nebulizer Treatment",
+    "price": 250.00,
+    "id": 702
+  },
+  {
+    "category": "Limb and Brace",
+    "name": "Arm Cast",
+    "price": 1500.00,
+    "id": 801
+  },
+  {
+    "category": "Limb and Brace",
+    "name": "Leg Cast",
+    "price": 2000.00,
+    "id": 802
+  },
+  {
+    "category": "Limb and Brace",
+    "name": "Knee Brace",
+    "price": 800.00,
+    "id": 803
+  },
+  {
+    "category": "Seat & Ad. Fee General",
+    "name": "Adult Linen Fee",
+    "type": "Linen Service",
+    "price": 50.00,
+    "id": 804
+  },
+  {
+    "category": "Seat & Ad. Fee General",
+    "name": "Baby Linen Fee",
+    "type": "Linen Service",
+    "price": 30.00,
+    "id": 805
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "Adult Linen Fee - Premium",
+    "type": "Linen Service",
+    "price": 80.00,
+    "id": 806
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "Baby Linen Fee - Premium",
+    "type": "Linen Service",
+    "price": 60.00,
+    "id": 807
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "VIP Linen Package - Adult",
+    "type": "Linen Service",
+    "price": 120.00,
+    "id": 808
+  },
+  {
+    "category": "Seat & Ad. Fee Private",
+    "name": "VIP Linen Package - Baby",
+    "type": "Linen Service",
+    "price": 100.00,
+    "id": 809
+  }
+]

@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Billing System - Pure Client Side</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Mobile-First Responsive Layout */
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(15, 26, 74, 0.98), rgba(26, 42, 108, 0.98));
+            backdrop-filter: blur(20px);
+            border-left: 2px solid var(--secondary);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .mobile-sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .sidebar-title {
+            color: var(--secondary);
+            font-size: 18px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 201, 167, 0.5);
+        }
+
+        .sidebar-close {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff0055;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            background: rgba(255, 0, 85, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .sidebar-nav-item {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .sidebar-nav-item:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--secondary);
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(0, 201, 167, 0.4);
+            color: white;
+        }
+
+        .sidebar-nav-item.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 201, 167, 0.3);
+        }
+
+        .sidebar-nav-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Mobile menu toggle button removed */
+
+        /* Header adjustments for mobile */
+        header {
+            padding: 10px 20px;
+        }
+
+        .header-container {
+            justify-content: center;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+        }
+
+        .nav-buttons {
+            display: none;
+        }
+
+        /* Main content mobile adjustments */
+        .main-content {
+            padding: 20px 0;
+        }
+
+        .container-fluid {
+            padding: 0 15px;
+        }
+
+        .billing-section, .preview-section {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title h3 {
+            font-size: 18px;
+        }
+
+        /* Form improvements for mobile */
+        .form-control, .form-select {
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 12px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* Button grid improvements */
+        .quick-actions-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 15px 0;
+        }
+
+        .category-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .export-button, .category-btn {
+            padding: 15px 10px;
+            min-height: 70px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .export-button i, .category-btn i {
+            font-size: 20px;
+        }
+
+        .export-button span, .category-btn span {
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Patient info mobile layout */
+        .patient-info-section .row {
+            margin-bottom: 15px;
+        }
+
+        /* Bill preview mobile improvements */
+        .total-cost-indicator {
+            padding: 20px 15px;
+            margin-bottom: 20px;
+        }
+
+        .cost-amount {
+            font-size: 32px;
+        }
+
+        .export-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Table mobile responsiveness */
+        .table-responsive {
+            font-size: 12px;
+        }
+
+        .table-responsive th,
+        .table-responsive td {
+            padding: 8px 4px;
+            white-space: nowrap;
+        }
+
+        /* Hide system status bar */
+        .system-status-bar {
+            display: none;
+        }
+
+        /* Desktop view adjustments */
+        @media (min-width: 992px) {
+            .nav-buttons {
+                display: flex !important;
+            }
+
+            .header-container {
+                justify-content: space-between;
+            }
+
+            .logo h1 {
+                font-size: 28px;
+            }
+
+            .quick-actions-container {
+                display: flex;
+                gap: 8px;
+            }
+
+            .category-buttons-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .export-container {
+                display: flex;
+                gap: 15px;
+            }
+        }
+
+        /* Tablet view */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .quick-actions-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .category-buttons-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .export-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Large mobile improvements */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .mobile-sidebar {
+                width: 350px;
+                right: -400px;
+            }
+
+            .export-button, .category-btn {
+                min-height: 80px;
+                padding: 20px 15px;
+            }
+
+            .export-button i, .category-btn i {
+                font-size: 24px;
+            }
+
+            .export-button span, .category-btn span {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Geometric Background -->
+    <div class="geometric-bg">
+        <div class="triangle triangle-1"></div>
+        <div class="triangle triangle-2"></div>
+        <div class="triangle triangle-3"></div>
+        <div class="triangle triangle-4"></div>
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+    </div>
+
+    <!-- Navigation Toggle -->
+    <button class="side-nav-toggle" id="sideNavToggle" onclick="toggleSideNav()" title="Navigation Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Navigation Overlay -->
+    <div class="side-nav-overlay" id="sideNavOverlay" onclick="closeSideNav()"></div>
+
+    <!-- Navigation Panel -->
+    <div class="side-nav-panel" id="sideNavPanel">
+        <div class="side-nav-header">
+            <h5 class="side-nav-title">Navigation</h5>
+            <button class="side-nav-close" onclick="closeSideNav()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="side-nav-content">
+            <a href="landing.html" class="side-nav-item">
+                <i class="fas fa-home"></i>
+                <span>Main Portal</span>
+            </a>
+
+            <a href="inpatient.html" class="side-nav-item">
+                <i class="fas fa-bed"></i>
+                <span>Inpatient System</span>
+            </a>
+
+            <div class="side-nav-item" onclick="openPriceEditModal(); closeSideNav();">
+                <i class="fas fa-money-bill"></i>
+                <span>Price Edit</span>
+            </div>
+
+            <a href="edit.html" class="side-nav-item primary">
+                <i class="fas fa-edit"></i>
+                <span>Edit Mode</span>
+            </a>
+
+            <div class="side-nav-divider"></div>
+
+            <div class="side-nav-item" onclick="showSystemInfo(); closeSideNav();">
+                <i class="fas fa-info-circle"></i>
+                <span>System Info</span>
+            </div>
+
+            <div class="side-nav-item" onclick="exportAllData(); closeSideNav();">
+                <i class="fas fa-download"></i>
+                <span>Export All Data</span>
+            </div>
+
+            <div class="side-nav-item danger" onclick="clearAllData(); closeSideNav();">
+                <i class="fas fa-trash"></i>
+                <span>Clear All Data</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <i class="theme-toggle-icon fas fa-moon" id="themeIcon"></i>
+        <span class="theme-toggle-text" id="themeText">Dark</span>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-hospital"></i>
+                <div>
+                    <h1>Hospital Billing System</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- System Status Bar -->
+    <div class="system-status-bar">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="status-info">
+                    <span class="status-dot bg-success"></span>
+                    <small>Local Database Active</small>
+                    <span class="mx-2">•</span>
+                    <small id="itemCount">Loading items...</small>
+                </div>
+                <div class="system-actions">
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="exportAllData()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="row g-3">
+                <!-- Left Column - Billing Input -->
+                <div class="col-lg-6">
+                    <div class="billing-section">
+
+
+                        <!-- Patient Information -->
+                        <div class="patient-info-minimal">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="patientInfoToggle" onchange="togglePatientInfo()" style="background-color: rgba(0, 201, 167, 0.1); border: 2px solid rgba(0, 201, 167, 0.4); transform: scale(1.2);">
+                                <label class="form-check-label" for="patientInfoToggle" style="color: white; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.3s ease;">
+                                    <i class="fas fa-user me-1" style="color: var(--secondary);"></i>
+                                    Patient Information
+                                </label>
+                            </div>
+                            <div id="patientInfoFields" style="display: none;">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control form-control-sm" id="patientName" placeholder="Patient name">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control form-control-sm" id="opdNumber" placeholder="OPD number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Global Search Section -->
+                        <div class="global-search-section mb-4">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="globalSearch" class="form-label">
+                                        <i class="fas fa-search me-2"></i>Smart Multi-Select Search - Click items to add
+                                    </label>
+                                    <div class="autocomplete-container">
+                                        <div class="search-input-container" style="position: relative;">
+                                            <!-- Selected tags display - hidden by default -->
+                                            <div id="selectedTags" class="selected-tags-container" style="display: none; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 201, 167, 0.3); border-radius: 8px; padding: 8px; margin-bottom: 8px; min-height: 45px; flex-wrap: wrap; gap: 6px;"></div>
+
+                                            <input type="text" class="form-control search-box" id="globalSearch" 
+                                                   placeholder="Type item name like 'cbc' then click suggestions..." 
+                                                   oninput="handleGlobalSearch()" 
+                                                   onkeydown="handleGlobalSearchKeydown(event)"
+                                                   autocomplete="off"
+                                                   style="border-color: rgba(0, 201, 167, 0.4);">
+                                        </div>
+                                        <div id="globalSearchDropdown" class="medicine-dropdown" style="display: none;"></div>
+                                    </div>
+
+                                    <!-- Quick suggestions like lab system -->
+                                    <div id="globalQuickSuggestions" class="quick-lab-suggestions mt-3" style="display: none;">
+                                        <div class="quick-lab-container">
+                                            <div id="globalSuggestion1" class="lab-quick-button" style="display: none;" onclick="selectGlobalFromQuickButton(this)">
+                                                <i class="fas fa-star"></i>
+                                                <span></span>
+                                            </div>
+                                            <div id="globalSuggestion2" class="lab-quick-button" style="display: none;" onclick="selectGlobalFromQuickButton(this)">
+                                                <i class="fas fa-fire"></i>
+                                                <span></span>
+                                            </div>
+                                            <div id="globalSuggestion3" class="lab-quick-button" style="display: none;" onclick="selectGlobalFromQuickButton(this)">
+                                                <i class="fas fa-heart"></i>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="global-search-stats mt-2">
+                                        <small class="text-muted">
+                                            <span id="globalSearchStats">Search across all categories • Click suggestions to add quickly</span>
+                                        </small>
+                                    </div>
+
+                                    <!-- Quick action buttons for selected items -->
+                                    <div id="multiSelectActions" class="mt-3" style="display: none;">
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-success btn-sm" onclick="addAllSelectedItems()">
+                                                <i class="fas fa-plus-circle me-1"></i>Add All to Bill (<span id="selectedCount">0</span>)
+                                            </button>
+                                            <button type="button" class="btn btn-outline-light btn-sm" onclick="clearAllSelectedItems()">
+                                                <i class="fas fa-times me-1"></i>Clear All
+                                            </button>
+                                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="showSelectedItemsTotal()">
+                                                <i class="fas fa-calculator me-1"></i>Preview Total
+                                            </button>
+                                        </div>
+                                        <div id="selectedItemsTotal" class="mt-2" style="display: none;">
+                                            <div class="alert alert-info" style="background: rgba(0, 201, 167, 0.1); border: 1px solid rgba(0, 201, 167, 0.3); color: white; padding: 10px; border-radius: 8px;">
+                                                <strong>Total for selected items: <span id="totalPreview">৳0.00</span></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Action Buttons -->
+                        <div class="quick-actions-container mt-3" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="export-button btn-glow" onclick="handleRegistration()" style="flex: 1; min-width: 0;" title="Add Registration Fee (Only one registration allowed)">
+                                <i class="fas fa-user-plus" style="color: #74c0fc;"></i>
+                                <span>Registration</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="handleDrFee()" style="flex: 1; min-width: 0;" title="Add Doctor Fee (Only one doctor fee allowed)">
+                                <i class="fas fa-user-md" style="color: #69db7c;"></i>
+                                <span>Dr. Fee</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="handleMedicFee()" style="flex: 1; min-width: 0;" title="Add Medic Fee (Only one medic fee allowed)">
+                                <i class="fas fa-user-nurse" style="color: #ffd43b;"></i>
+                                <span>Medic Fee</span>
+                            </button>
+                        </div>
+
+                        <!-- Off-Charge/OB Check Night -->
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="offChargeCheckNight" onchange="toggleOffChargeCheckNight()">
+                            <label class="form-check-label" for="offChargeCheckNight" style="color: white; cursor: pointer;">
+                                Off-Charge/OB Check Night
+                            </label>
+                        </div>
+
+
+
+                        <!-- Category Selection -->
+                        <div class="category-selection">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0">
+                                    <i class="fas fa-list-check me-2"></i>Select Category
+                                </label>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="resetCategorySelection()">
+                                    <i class="fas fa-undo me-1"></i>Reset
+                                </button>
+                            </div>
+                            
+                            <!-- Compact Single-Line Buttons -->
+                            <div class="category-compact-container">
+                                <button class="category-compact-btn" data-category="Lab" onclick="selectCategoryFromList('Lab')" title="Laboratory Tests">
+                                    <i class="fas fa-flask"></i>
+                                    <span>Lab</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="OR" onclick="selectCategoryFromList('OR')" title="Operating Room">
+                                    <i class="fas fa-procedures"></i>
+                                    <span>OR</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="Medicine" onclick="selectCategoryFromList('Medicine')" title="Medicines & Pharmacy">
+                                    <i class="fas fa-pills"></i>
+                                    <span>Medicine</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="Procedure" onclick="selectCategoryFromList('Procedure')" title="Medical Procedures">
+                                    <i class="fas fa-stethoscope"></i>
+                                    <span>Procedure</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="X-ray" onclick="selectCategoryFromList('X-ray')" title="X-ray Imaging">
+                                    <i class="fas fa-x-ray"></i>
+                                    <span>X-ray</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="O2, ISO" onclick="selectCategoryFromList('O2, ISO')" title="Oxygen & ISO Therapy">
+                                    <i class="fas fa-lungs"></i>
+                                    <span>O2, ISO</span>
+                                </button>
+                                
+                                <button class="category-compact-btn" data-category="Limb and Brace" onclick="selectCategoryFromList('Limb and Brace')" title="Limb & Brace Equipment">
+                                    <i class="fas fa-hand-paper"></i>
+                                    <span>Limb & Brace</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Hidden select for compatibility -->
+                            <select id="categorySelect" class="form-select" style="display: none;" onchange="showItemInput()">
+                                <option value="">-- Select Category --</option>
+                                <option value="Lab">Lab</option>
+                                <option value="OR">OR</option>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Procedure">Procedure</option>
+                                <option value="X-ray">X-ray</option>
+                                <option value="O2, ISO">O2, ISO</option>
+                                <option value="Limb and Brace">Limb & Brace</option>
+                            </select>
+                        </div>
+
+                        <!-- Dynamic Inputs -->
+                        <div id="dynamicInputs" class="dynamic-inputs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Total Amount and Bill Preview -->
+                <div class="col-lg-6">
+                    <div class="preview-section">
+                        <!-- Total Cost Indicator -->
+                        <div class="total-cost-indicator">
+                            <div class="cost-display">
+                                <div class="cost-label">TOTAL AMOUNT</div>
+                                <div class="cost-amount" id="topGrandTotal">৳0.00</div>
+                            </div>
+                        </div>
+
+                        <!-- Patient Information Display -->
+                        <div class="patient-info-enhanced" style="display: none;" id="patientInfoCard">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Patient Name</span>
+                                    <span class="info-value" id="previewPatient">Not specified</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">OPD Number</span>
+                                    <span class="info-value" id="previewOPD">Not specified</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Bill Date</span>
+                                    <span class="info-value" id="billDate"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Bill Number</span>
+                                    <span class="info-value" id="billNumber">HB-2025-001</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bill Items Container -->
+                        <div class="bill-items-container">
+                            <div id="categorizedBillItems">
+                                <div class="empty-state" id="emptyBillState">
+                                    <i class="fas fa-clipboard-list fa-2x"></i>
+                                    <h6>No items added yet</h6>
+                                    <p class="small">Start adding services and medicines to generate the bill</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="export-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button type="button" class="export-button btn-glow" onclick="saveBillToHistory()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-save"></i>
+                                <span>Save Bill</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow danger" onclick="clearBill()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-trash"></i>
+                                <span>Clear All</span>
+                            </button>
+                        </div>
+
+                        <!-- Export Actions -->
+                        <div class="section-title mt-4">
+                            <i class="fas fa-download"></i>
+                            <h3>Export, Print & Edit</h3>
+                        </div>
+
+                        <div class="export-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button type="button" class="export-button btn-glow" onclick="exportBillPDF()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-file-pdf" style="color: #ff6b6b;"></i>
+                                <span>Export PDF</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="exportExcel()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-file-excel" style="color: #51cf66;"></i>
+                                <span>Export Excel</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="generateBillPrint()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-print" style="color: #4dabf7;"></i>
+                                <span>Print Bill</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="window.open('edit.html', '_blank')" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-database" style="color: #ff8cc8;"></i>
+                                <span>Edit Database</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="window.open('inpatient.html', '_blank')" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-bed" style="color: #51cf66;"></i>
+                                <span>Inpatient System</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="openPriceEditModal()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-money-bill" style="color: #ffd43b;"></i>
+                                <span>Quick Price</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="showSystemInfo()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-info-circle" style="color: #4dabf7;"></i>
+                                <span>System Info</span>
+                            </button>
+                            <button type="button" class="export-button btn-glow" onclick="exportDatabase()" style="flex: 1; min-width: 120px;">
+                                <i class="fas fa-download" style="color: #69db7c;"></i>
+                                <span>Export Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- System Info Modal -->
+    <div class="modal fade" id="systemInfoModal" tabindex="-1" aria-labelledby="systemInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 201, 167, 0.1);">
+                    <h5 class="modal-title" id="systemInfoModalLabel" style="color: var(--secondary); font-weight: 600;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        System Information
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background: none; border: none; color: white; font-size: 1.2rem;"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 25px;">
+                    <!-- System Status Header -->
+                    <div class="patient-info-enhanced mb-4">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">System Status</span>
+                                <span class="info-value" style="color: var(--secondary);">
+                                    <i class="fas fa-check-circle me-1"></i>Operational
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Version</span>
+                                <span class="info-value">2.0 - LocalDB Only</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Database</span>
+                                <span class="info-value" style="color: var(--secondary);">
+                                    <i class="fas fa-database me-1"></i>Active
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Items Count</span>
+                                <span class="info-value" id="modalItemCount">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Database Status Section -->
+                    <div class="billing-section mb-4">
+                        <div class="section-title">
+                            <i class="fas fa-database"></i>
+                            <h6 style="margin: 0;">Database Information</h6>
+                        </div>
+
+                        <div class="patient-info-section">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Storage Engine</span>
+                                        <span class="info-value">IndexedDB</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Data Security</span>
+                                        <span class="info-value">Local Only</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Architecture</span>
+                                        <span class="info-value">Pure Client-Side</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Database Type</span>
+                                        <span class="info-value">Local IndexedDB</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Privacy Level</span>
+                                        <span class="info-value">100% Local</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Features Section -->
+                    <div class="billing-section">
+                        <div class="section-title">
+                            <i class="fas fa-cogs"></i>
+                            <h6 style="margin: 0;">System Features</h6>
+                        </div>
+
+                        <div class="patient-info-section">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Pure Client-Side Architecture</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Zero Server Dependencies</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Persistent Local Storage</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Multi-Format Export</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Bill History Management</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Dynamic Price Management</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Real-time Calculations</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--secondary);"></i>
+                                        <span style="font-size: 0.9rem;">Smart Autocomplete System</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 201, 167, 0.05);">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="refreshSystemInfo()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="ms-3">Processing...</span>
+    </div>
+
+    <!-- Price Edit Modal -->
+    <div class="modal fade" id="priceEditModal" tabindex="-1" aria-labelledby="priceEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 201, 167, 0.1);">
+                    <h5 class="modal-title" id="priceEditModalLabel" style="color: var(--secondary); font-weight: 600;">
+                        <i class="fas fa-money-bill me-2"></i>
+                        Quick Price Edit
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background: none; border: none; color: white; font-size: 1.2rem;"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 25px;">
+                    <!-- Status Header -->
+                    <div class="patient-info-enhanced mb-4">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Database Status</span>
+                                <span class="info-value" style="color: var(--secondary);">
+                                    <i class="fas fa-check-circle me-1"></i>Online
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Total Records</span>
+                                <span class="info-value" id="totalRecords">0</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Selected Category</span>
+                                <span class="info-value" id="selectedCategory">None</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Pending Changes</span>
+                                <span class="info-value" id="pendingChanges">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Selection -->
+                    <div class="billing-section mb-4">
+                        <div class="section-title">
+                            <i class="fas fa-layer-group"></i>
+                            <h6 style="margin: 0;">Select Category</h6>
+                        </div>
+
+                        <div class="category-buttons-grid">
+                            <div class="export-button category-btn" data-category="Registration">
+                                <i class="fas fa-user-plus" style="color: #74c0fc;"></i>
+                                <span>Registration</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Dr. Fee">
+                                <i class="fas fa-user-md" style="color: #69db7c;"></i>
+                                <span>Dr. Fee</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Medic Fee">
+                                <i class="fas fa-user-nurse" style="color: #ffd43b;"></i>
+                                <span>Medic Fee</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Off-Charge/OB">
+                                <i class="fas fa-baby" style="color: #ff8cc8;"></i>
+                                <span>Off-Charge/OB</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Lab">
+                                <i class="fas fa-flask" style="color: #74c0fc;"></i>
+                                <span>Lab</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="OR">
+                                <i class="fas fa-procedures" style="color: #69db7c;"></i>
+                                <span>OR</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Medicine">
+                                <i class="fas fa-pills" style="color: #ffd43b;"></i>
+                                <span>Medicine</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Procedure">
+                                <i class="fas fa-stethoscope" style="color: #ff8cc8;"></i>
+                                <span>Procedure</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="X-ray">
+                                <i class="fas fa-x-ray" style="color: #51cf66;"></i>
+                                <span>X-ray</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Seat & Ad. Fee General">
+                                <i class="fas fa-chair" style="color: #ff6b6b;"></i>
+                                <span>Seat & Ad. Fee General</span>
+                            </div>
+                             <div class="export-button category-btn" data-category="Seat & Ad. Fee Private">
+                                <i class="fas fa-chair" style="color: #ff6b6b;"></i>
+                                <span>Seat & Ad. Fee Private</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="O2, ISO">
+                                <i class="fas fa-lungs" style="color: #4dabf7;"></i>
+                                <span>O2, ISO</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Limb and Brace">
+                                <i class="fas fa-hand-paper" style="color: #ff9776;"></i>
+                                <span>Limb & Brace</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Private Room Charges">
+                                <i class="fas fa-door-open" style="color: #dc3545;"></i>
+                                <span>Private Room Charges</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Baby Bed Fee(General)">
+                                <i class="fas fa-baby" style="color: #82ca9d;"></i>
+                                <span>Baby Bed Fee (General)</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Baby Bed Fee(Private)">
+                                <i class="fas fa-baby" style="color: #ff7c7c;"></i>
+                                <span>Baby Bed Fee (Private)</span>
+                            </div>
+                            <div class="export-button category-btn" data-category="Medicine">
+                                <i class="fas fa-pills" style="color: #ffd43b;"></i>
+                                <span>Medicine</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Section -->
+                    <div class="billing-section" id="databaseControls" style="display: none;">
+                        <div class="section-title">
+                            <i class="fas fa-database"></i>
+                            <h6 style="margin: 0;">Price Management</h6>
+                        </div>
+
+                        <!-- Management Actions -->
+                        <div class="export-container mb-3">
+                            <button class="export-button" onclick="bulkPriceUpdate()">
+                                <i class="fas fa-calculator"></i>
+                                <span>Bulk Update</span>
+                            </button>
+                            <button class="export-button" onclick="exportCategory()">
+                                <i class="fas fa-download"></i>
+                                <span>Export Data</span>
+                            </button>
+                            <button class="export-button danger" onclick="clearCategoryModal()">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Clear Category</span>
+                            </button>
+                            <button class="export-button" onclick="refreshModalData()">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                        </div>
+
+                        <!-- Search and Filter -->
+                        <div class="patient-info-section mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Search Items</label>
+                                    <input type="text" class="form-control" id="modalSearchBox" 
+                                           placeholder="Search by name, type, or strength..." 
+                                           oninput="filterModalItems()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">View</label>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-light active" data-view="table" onclick="switchView('table')">
+                                            <i class="fas fa-table"></i> Table
+                                        </button>
+                                        <button class="btn btn-outline-light" data-view="grid" onclick="switchView('grid')">
+                                            <i class="fas fa-th"></i> Grid
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Display -->
+                        <div id="modalItemsContainer" class="bill-items-container">
+                            <div class="table-view active" id="tableView">
+                                <div class="category-section">
+                                    <div class="category-header">
+                                        <h6 class="category-title">
+                                            <i class="fas fa-list"></i>
+                                            Items
+                                        </h6>
+                                        <div class="category-total" id="modalItemCount">0 Records</div>
+                                    </div>
+
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-dark table-hover align-middle">
+                                            <thead style="position: sticky; top: 0; background: var(--dark); z-index: 10;">
+                                                <tr>
+                                                    <th style="color: var(--secondary);">Name</th>
+                                                    <th style="color: var(--secondary);">Type</th>
+                                                    <th style="color: var(--secondary);">Strength</th>
+                                                    <th style="color: var(--secondary);">Current Price</th>
+                                                    <th style="color: var(--secondary);">New Price</th>
+                                                    <th style="color: var(--secondary);" class="text-center">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="modalItemsTable">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-5">
+                                                        <div class="empty-state">
+                                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                            <h6>Select a category to load items</h6>
+                                                            <p class="mb-0 small">Choose a category above to start editing prices</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-view" id="gridView" style="display: none;">
+                                <div id="modalItemsGrid" class="row g-3">
+                                    <!-- Grid items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 201, 167, 0.05);">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveModalChanges()" id="saveChangesBtn" disabled>
+                        <i class="fas fa-save me-1"></i>Apply Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation Section -->
+    <div class="quick-navigation-section">
+        <div class="container-fluid">
+            <div class="quick-nav-container">
+                <a href="index.html" class="quick-nav-btn active">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Outpatient</span>
+                </a>
+                <a href="inpatient.html" class="quick-nav-btn">
+                    <i class="fas fa-bed"></i>
+                    <span>Inpatient</span>
+                </a>
+                <a href="edit.html" class="quick-nav-btn">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Hospital Billing System - Pure Client Side Edition. All rights reserved.</p>
+    </footer>
+
+    <!-- Error Handler - Must load first -->
+    <script>
+        // Safe error handler that doesn't interfere with localStorage access
+        window.addEventListener('error', function(e) {
+            // Only log to console, don't show UI errors that might cause more issues
+            console.error('JavaScript Error:', e.error?.message || 'Unknown error');
+            console.error('File:', e.filename, 'Line:', e.lineno);
+        });
+
+        // Check if critical functions are available after everything loads
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                try {
+                    if (typeof showItemInput === 'undefined') {
+                        console.warn('showItemInput function not found - system may still be loading');
+                        // Try again after a longer delay
+                        setTimeout(function() {
+                            if (typeof showItemInput === 'undefined') {
+                                console.error('Core functions failed to load after extended wait');
+                            }
+                        }, 3000);
+                    }
+                } catch (err) {
+                    console.error('Error checking function availability:', err.message);
+                }
+            }, 2000); // Increased timeout for better loading
+        });
+    </script>
+
+    <!-- Local Database - Must load first -->
+    <script src="local-database.js"></script>
+
+    <!-- Database API - Loads after local database -->
+    <script src="database-api.js"></script>
+
+    <!-- Main Application Script - Loads after database API -->
+    <script src="app.js"></script>
+
+    <script>
+        // Patient Info Checkbox Toggle Handler
+        function togglePatientInfo() {
+            const checkbox = document.getElementById('patientInfoToggle');
+            const fields = document.getElementById('patientInfoFields');
+            const label = document.querySelector('label[for="patientInfoToggle"]');
+
+            if (checkbox && fields && label) {
+                if (checkbox.checked) {
+                    fields.style.display = 'block';
+                    label.style.background = 'rgba(0, 201, 167, 0.2)';
+                    label.style.borderColor = 'rgba(0, 201, 167, 0.4)';
+                    label.style.color = 'var(--secondary)';
+
+                    // Add a smooth fade-in animation
+                    fields.style.opacity = '0';
+                    fields.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        fields.style.transition = 'all 0.3s ease';
+                        fields.style.opacity = '1';
+                        fields.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    fields.style.display = 'none';
+                    label.style.background = '';
+                    label.style.borderColor = '';
+                    label.style.color = 'white';
+
+                    // Clear the input values when hiding
+                    const patientName = document.getElementById('patientName');
+                    const opdNumber = document.getElementById('opdNumber');
+                    if (patientName) patientName.value = '';
+                    if (opdNumber) opdNumber.value = '';
+
+                    // Update patient info display
+                    if (typeof updatePatientInfo === 'function') {
+                        updatePatientInfo();
+                    }
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure fields are hidden by default
+            const fields = document.getElementById('patientInfoFields');
+            if (fields) {
+                fields.style.display = 'none';
+            }
+        });
+    </script>
+
+    <script>
+        // System Status Check
+        function checkSystemStatus() {
+            const statusElement = document.getElementById('itemCount');
+            if (statusElement) {
+                statusElement.textContent = '✅ Client-side system active - No server required';
+            }
+
+            // Check if database is working
+            if (window.dbAPI) {
+                console.log('✅ Database API loaded successfully');
+            } else {
+                console.warn('⚠️ Database API not yet loaded - this is normal during startup');
+            }
+        }
+
+        // Call status check on load
+        setTimeout(checkSystemStatus, 1000);
+
+        // Additional functions for pure client-side system
+
+        // Show system information
+        function showSystemInfo() {
+            updateSystemInfoModal();
+            const modal = new bootstrap.Modal(document.getElementById('systemInfoModal'));
+            modal.show();
+        }
+
+        // Update system info modal with current data
+        async function updateSystemInfoModal() {
+            try {
+                const allItems = await window.dbAPI.getAllItems();
+                document.getElementById('modalItemCount').textContent = allItems.length;
+            } catch (error) {
+                document.getElementById('modalItemCount').textContent = 'Error loading';
+            }
+        }
+
+        // Export database function
+        async function exportDatabase() {
+            await exportAllData();
+        }
+
+        // Export all data (items + bills)
+        async function exportAllData() {
+            try {
+                showLoading(true);
+                const items = await window.dbAPI.getAllItems();
+                const bills = await window.dbAPI.getBills();
+
+                if (items.length === 0) {
+                    showToast('No data to export', 'warning');
+                    return;
+                }
+
+                const dateStr = new Date().toISOString().split('T')[0];
+
+                // Export 1: Database JSON format
+                const exportData = {
+                    items: items,
+                    bills: bills,
+                    exportDate: new Date().toISOString(),
+                    version: '2.0',
+                    system: 'Pure Client-Side'
+                };
+
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const jsonBlob = new Blob([dataStr], { type: 'application/json' });
+
+                const jsonLink = document.createElement('a');
+                jsonLink.href = URL.createObjectURL(jsonBlob);
+                jsonLink.download = `hospital_database_${dateStr}.json`;
+                document.body.appendChild(jsonLink);
+                jsonLink.click();
+                document.body.removeChild(jsonLink);
+
+                console.log('JSON export completed');
+
+                // Small delay between downloads
+                setTimeout(() => {
+                    // Export 2: Excel format
+                    try {
+                        console.log('Starting Excel export...');
+                        console.log('XLSX library available:', typeof XLSX !== 'undefined');
+
+                        if (typeof XLSX !== 'undefined') {
+                            console.log('Creating Excel workbook...');
+                            const workbook = XLSX.utils.book_new();
+
+                            // Items sheet
+                            const itemsData = [
+                                ['Category', 'Name', 'Type', 'Strength', 'Price', 'X-ray AP', 'X-ray LAT', 'X-ray OBLIQUE', 'X-ray BOTH', 'Description']
+                            ];
+
+                            items.forEach(item => {
+                                itemsData.push([
+                                    item.category || '',
+                                    item.name || '',
+                                    item.type || '',
+                                    item.strength || '',
+                                    item.price || 0,
+                                    item.xrayPricing?.ap || '',
+                                    item.xrayPricing?.lat || '',
+                                    item.xrayPricing?.oblique || '',
+                                    item.xrayPricing?.both || '',
+                                    item.description || ''
+                                ]);
+                            });
+
+                            console.log('Created items sheet with', itemsData.length - 1, 'items');
+
+                            // Bills sheet
+                            const billsData = [
+                                ['Bill Number', 'Patient Name', 'OPD Number', 'Date', 'Total Amount', 'Items Count']
+                            ];
+
+                            bills.forEach(bill => {
+                                billsData.push([
+                                    bill.billNumber || '',
+                                    bill.patientName || '',
+                                    bill.opdNumber || '',
+                                    bill.date ? new Date(bill.date).toLocaleDateString() : '',
+                                    bill.grandTotal || 0,
+                                    bill.items ? bill.items.length : 0
+                                ]);
+                            });
+
+                            console.log('Created bills sheet with', billsData.length - 1, 'bills');
+
+                            // Create worksheets
+                            const itemsWorksheet = XLSX.utils.aoa_to_sheet(itemsData);
+                            const billsWorksheet = XLSX.utils.aoa_to_sheet(billsData);
+
+                            XLSX.utils.book_append_sheet(workbook, itemsWorksheet, 'Items');
+                            XLSX.utils.book_append_sheet(workbook, billsWorksheet, 'Bills Summary');
+
+                            console.log('Worksheets created, writing Excel file...');
+
+                            // Save Excel file
+                            const excelFileName = `hospital_data_${dateStr}.xlsx`;
+                            XLSX.writeFile(workbook, excelFileName);
+
+                            console.log('Excel file written:', excelFileName);
+                            showToast('✅ Both JSON and Excel files downloaded successfully!', 'success');
+                        } else {
+                            console.error('XLSX library not loaded');
+                            showToast('❌ Excel library not available. Only JSON file downloaded.', 'warning');
+                        }
+                    } catch (excelError) {
+                        console.error('Excel export error:', excelError);
+                        showToast('⚠️ JSON downloaded successfully. Excel export failed: ' + excelError.message, 'warning');
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Export failed: ' + error.message, 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Export to Excel format
+        function exportToExcel(items, bills) {
+            try {
+                console.log('exportToExcel called with', items.length, 'items and', bills.length, 'bills');
+
+                // Check if XLSX library is loaded
+                if (typeof XLSX === 'undefined') {
+                    console.error('XLSX library not loaded');
+                    showToast('❌ Excel library not available, only JSON export completed', 'warning');
+                    return false;
+                }
+
+                const dateStr = new Date().toISOString().split('T')[0];
+                console.log('Creating Excel file for date:', dateStr);
+
+                // Create workbook
+                const workbook = XLSX.utils.book_new();
+
+                // Items sheet data
+                const itemsData = [
+                    ['Category', 'Name', 'Type', 'Strength', 'Price', 'X-ray AP', 'X-ray LAT', 'X-ray OBLIQUE', 'X-ray BOTH', 'Description']
+                ];
+
+                items.forEach(item => {
+                    const row = [
+                        item.category || '',
+                        item.name || '',
+                        item.type || '',
+                        item.strength || '',
+                        item.price || 0,
+                        item.xrayPricing?.ap || '',
+                        item.xrayPricing?.lat || '',
+                        item.xrayPricing?.oblique || '',
+                        item.xrayPricing?.both || '',
+                        item.description || ''
+                    ];
+                    itemsData.push(row);
+                });
+
+                // Bills summary sheet data
+                const billsData = [
+                    ['Bill Number', 'Patient Name', 'OPD Number', 'Date', 'Total Amount', 'Items Count']
+                ];
+
+                bills.forEach(bill => {
+                    const row = [
+                        bill.billNumber || '',
+                        bill.patientName || '',
+                        bill.opdNumber || '',
+                        bill.date ? new Date(bill.date).toLocaleDateString() : '',
+                        bill.grandTotal || 0,
+                        bill.items ? bill.items.length : 0
+                    ];
+                    billsData.push(row);
+                });
+
+                console.log('Excel data prepared - Items:', itemsData.length - 1, 'Bills:', billsData.length - 1);
+
+                // Create worksheets
+                const itemsWorksheet = XLSX.utils.aoa_to_sheet(itemsData);
+                const billsWorksheet = XLSX.utils.aoa_to_sheet(billsData);
+
+                // Add worksheets to workbook
+                XLSX.utils.book_append_sheet(workbook, itemsWorksheet, 'Items');
+                XLSX.utils.book_append_sheet(workbook, billsWorksheet, 'Bills Summary');
+
+                console.log('Worksheets added to workbook');
+
+                // Generate Excel file and trigger download
+                const fileName = `hospital_data_${dateStr}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+
+                console.log('✅ Excel file generated and downloaded:', fileName);
+                showToast('✅ Excel file downloaded successfully!', 'success');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Excel export error:', error);
+                showToast('❌ Excel export failed: ' + error.message, 'danger');
+                return false;
+            }
+        }
+
+        // Clear all data with confirmation
+        async function clearAllData() {
+            if (confirm('⚠️ WARNING: This will delete ALL data including items, bills, and history. This action cannot be undone!\n\nAre you absolutely sure?')) {
+                if (confirm('Last chance! Click OK to permanently delete everything or Cancel to keep your data.')) {
+                    try {
+                        showLoading(true);
+                        await window.dbAPI.resetDatabase();
+                        showToast('All data cleared and database reset', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } catch (error) {
+                        console.error('Clear error:', error);
+                        showToast('Clear failed: ' + error.message, 'danger');
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+            }
+        }
+
+        // Save bill to history
+        async function saveBillToHistory() {
+            if (billItems.length === 0) {
+                showToast('No items to save', 'warning');
+                return;
+            }
+
+            try {
+                const patientName = document.getElementById('patientName').value || 'Unknown Patient';
+                const opdNumber = document.getElementById('opdNumber').value || 'N/A';
+                const billNumber = document.getElementById('billNumber').textContent;
+                const total = billItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+                const bill = {
+                    billNumber: billNumber,
+                    patientName: patientName,
+                    opdNumber: opdNumber,
+                    totalAmount: total,
+                    items: billItems,
+                    createdAt: new Date().toISOString()
+                };
+
+                await window.dbAPI.saveBill(bill);
+                showToast(`Bill ${billNumber} saved to history`, 'success');
+            } catch (error) {
+                console.error('Save bill error:', error);
+                showToast('Failed to save bill: ' + error.message, 'danger');
+            }
+        }
+
+        // Mobile Sidebar System
+        let isMobileSidebarOpen = false;
+
+        function toggleMobileSidebar() {
+            if (isMobileSidebarOpen) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        }
+
+        function openMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const toggle = document.getElementById('mobileMenuToggle');
+
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            toggle.classList.add('active');
+            toggle.querySelector('i').className = 'fas fa-times';
+            isMobileSidebarOpen = true;
+
+            // Prevent body scroll when sidebar is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const toggle = document.getElementById('mobileMenuToggle');
+
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            toggle.classList.remove('active');
+            toggle.querySelector('i').className = 'fas fa-bars';
+            isMobileSidebarOpen = false;
+
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isMobileSidebarOpen) {
+                closeMobileSidebar();
+            }
+});
+
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const themeToggle = document.getElementById('themeToggle');
+
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            // Update theme
+            body.setAttribute('data-theme', newTheme);
+
+            // Update toggle button
+            if (newTheme === 'light') {
+                themeIcon.className = 'theme-toggle-icon fas fa-sun';
+                themeText.textContent = 'Light';
+                themeToggle.classList.remove('dark-mode');
+                themeToggle.classList.add('light-mode');
+            } else {
+                themeIcon.className = 'theme-toggle-icon fas fa-moon';
+                themeText.textContent = 'Dark';
+                themeToggle.classList.remove('light-mode');
+                themeToggle.classList.add('dark-mode');
+            }
+
+            // Save preference
+            localStorage.setItem('hospital-theme', newTheme);
+
+            // Show toast
+            showToast(`Switched to ${newTheme} mode`, 'success');
+        }
+
+        // Initialize theme on page load
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('hospital-theme') || 'dark';
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const themeToggle = document.getElementById('themeToggle');
+
+            body.setAttribute('data-theme', savedTheme);
+
+            if (savedTheme === 'light') {
+                themeIcon.className = 'theme-toggle-icon fas fa-sun';
+                themeText.textContent = 'Light';
+                themeToggle.classList.add('light-mode');
+            } else {
+                themeIcon.className = 'theme-toggle-icon fas fa-moon';
+                themeText.textContent = 'Dark';
+                themeToggle.classList.add('dark-mode');
+            }
+        }
+
+        // Auto-Hide Side Navigation System
+        let isSideNavOpen = false;
+        let sideNavTimeout;
+        let autoHideDelay = 8000; // 8 seconds
+
+        function toggleSideNav() {
+            if (isSideNavOpen) {
+                closeSideNav();
+            } else {
+                openSideNav();
+            }
+        }
+
+        function openSideNav() {
+            const panel = document.getElementById('sideNavPanel');
+            const overlay = document.getElementById('sideNavOverlay');
+            const toggle = document.getElementById('sideNavToggle');
+
+            if (panel && overlay && toggle) {
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                toggle.classList.add('active');
+                isSideNavOpen = true;
+
+                // Clear any existing timeout
+                clearTimeout(sideNavTimeout);
+
+                // Auto-hide after specified delay
+                sideNavTimeout = setTimeout(() => {
+                    if (isSideNavOpen) {
+                        closeSideNav();
+                    }
+                }, autoHideDelay);
+
+                // Prevent body scroll when side nav is open
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeSideNav() {
+            const panel = document.getElementById('sideNavPanel');
+            const overlay = document.getElementById('sideNavOverlay');
+            const toggle = document.getElementById('sideNavToggle');
+
+            if (panel && overlay && toggle) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                toggle.classList.remove('active');
+                isSideNavOpen = false;
+
+                clearTimeout(sideNavTimeout);
+
+                // Restore body scroll
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Reset auto-hide timer on mouse movement within side nav
+        function resetSideNavTimer() {
+            if (isSideNavOpen) {
+                clearTimeout(sideNavTimeout);
+                sideNavTimeout = setTimeout(() => {
+                    if (isSideNavOpen) {
+                        closeSideNav();
+                    }
+                }, autoHideDelay);
+            }
+        }
+
+        // Initialize side navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme
+            initializeTheme();
+
+            const panel = document.getElementById('sideNavPanel');
+            if (panel) {
+                panel.addEventListener('mouseenter', function() {
+                    clearTimeout(sideNavTimeout);
+                });
+
+                panel.addEventListener('mouseleave', function() {
+                    resetSideNavTimer();
+                });
+
+                panel.addEventListener('mousemove', function() {
+                    resetSideNavTimer();
+                });
+            }
+        });
+
+        // Close side nav on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isSideNavOpen) {
+                closeSideNav();
+            }
+        });
+
+        // Close side nav when clicking outside
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('sideNavPanel');
+            const toggle = document.getElementById('sideNavToggle');
+
+            if (isSideNavOpen && panel && toggle &&
+                !panel.contains(e.target) && !toggle.contains(e.target)) {
+                closeSideNav();
+            }
+        });
+
+
+</script>
+
+    <style>
+        /* Tag-based multi-select styles */
+        .selected-tags-container {
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-start;
+        }
+
+        .search-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 2px 8px rgba(0, 201, 167, 0.3);
+            animation: tagSlideIn 0.3s ease-out;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-tag:hover {
+            background: linear-gradient(135deg, var(--secondary), #00d8b4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 201, 167, 0.4);
+        }
+
+        .search-tag .tag-name {
+            color: white;
+            font-weight: 600;
+        }
+
+        .search-tag .tag-category {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-tag .tag-price {
+            color: #fff;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .search-tag .tag-remove {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-tag .tag-remove:hover {
+            background: rgba(255, 65, 108, 0.8);
+            transform: scale(1.1);
+        }
+
+        @keyframes tagSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .search-input-container input:focus {
+            border-color: var(--secondary) !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 201, 167, 0.25) !important;
+        }
+
+        #multiSelectActions .btn {
+            white-space: nowrap;
+        }
+
+        /* Enhanced dropdown for multi-select */
+        .medicine-dropdown .dropdown-item.selected-for-multi {
+            background: linear-gradient(135deg, rgba(0, 201, 167, 0.3), rgba(0, 201, 167, 0.2));
+            border-left: 3px solid var(--secondary);
+        }
+    </style>
+
+    <script>
+        // Global variables for multi-select functionality
+        let selectedItems = [];
+        let searchTimeout;
+
+        // Function to handle global search input with multi-select support
+        async function handleGlobalSearch() {
+            // Clear any existing timeout
+            clearTimeout(searchTimeout);
+
+            const searchInput = document.getElementById('globalSearch');
+            const searchTerm = searchInput.value.trim();
+            const dropdown = document.getElementById('globalSearchDropdown');
+            const stats = document.getElementById('globalSearchStats');
+
+            // Handle comma-separated input
+            if (searchTerm.includes(',')) {
+                const lastCommaIndex = searchTerm.lastIndexOf(',');
+                const currentTerm = searchTerm.substring(lastCommaIndex + 1).trim();
+                const previousTerms = searchTerm.substring(0, lastCommaIndex).trim();
+
+                if (previousTerms) {
+                    // Add the previous terms as tags
+                    await processPreviousTerms(previousTerms);
+                    searchInput.value = currentTerm;
+                }
+            }
+
+            // Set a small delay to avoid too many API calls
+            searchTimeout = setTimeout(async () => {
+                await performSearch();
+            }, 300);
+        }
+
+        async function processPreviousTerms(terms) {
+            const termList = terms.split(',').map(t => t.trim()).filter(t => t.length > 0);
+
+            for (const term of termList) {
+                if (term.length >= 2) {
+                    await addTermAsTag(term);
+                }
+            }
+        }
+
+        async function addTermAsTag(searchTerm) {
+            try {
+                const allItems = await window.dbAPI.getAllItems();
+                const searchResults = allItems.filter(item =>
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (item.type && item.type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (item.strength && item.strength.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+
+                if (searchResults.length > 0) {
+                    // Add the first/best match as a tag
+                    const bestMatch = searchResults[0];
+                    addItemToSelection(bestMatch);
+                }
+            } catch (error) {
+                console.error('Error processing term:', searchTerm, error);
+            }
+        }
+
+        async function performSearch() {
+            const searchTerm = document.getElementById('globalSearch').value.trim();
+            const dropdown = document.getElementById('globalSearchDropdown');
+            const stats = document.getElementById('globalSearchStats');
+
+            // Clear previous results
+            dropdown.innerHTML = '';
+            dropdown.style.display = 'none';
+
+            if (searchTerm.length < 2) {
+                stats.textContent = 'Search across all categories • Use comma (,) or ENTER to add multiple items';
+                return;
+            }
+
+            // Show loading message
+            stats.textContent = 'Searching...';
+
+            try {
+                const allItems = await window.dbAPI.getAllItems();
+
+                // Filter items based on the search term (case-insensitive)
+                const searchResults = allItems.filter(item => {
+                    // Exclude already selected items
+                    const isAlreadySelected = selectedItems.some(selected => selected.id === item.id);
+                    if (isAlreadySelected) return false;
+
+                    return item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (item.type && item.type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                           (item.strength && item.strength.toLowerCase().includes(searchTerm.toLowerCase()));
+                });
+
+                if (searchResults.length === 0) {
+                    dropdown.innerHTML = '<div class="dropdown-item-empty">No results found or all matching items already selected</div>';
+                    dropdown.style.display = 'block';
+                    stats.textContent = 'No new results found.';
+                    return;
+                }
+
+                // Display search results in the dropdown
+                let dropdownHTML = '';
+                searchResults.slice(0, 8).forEach((item, index) => {
+                    dropdownHTML += `
+                        <div class="dropdown-item"
+                             onclick="addItemToSelection(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                             data-index="${index}">
+                            <div class="medicine-name">${item.name}</div>
+                            <div class="medicine-details">
+                                ${item.category || 'General'} • ${item.type || 'N/A'} • ৳${item.price}
+                                ${item.strength ? ` • ${item.strength}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                dropdown.innerHTML = dropdownHTML;
+                dropdown.style.display = 'block';
+                stats.textContent = `Found ${searchResults.length} results • Click to add or use comma to search next`;
+
+            } catch (error) {
+                console.error('Global search error:', error);
+                stats.textContent = 'Search failed: ' + error.message;
+            }
+        }
+
+        // Function to add item to selection (tag system)
+        function addItemToSelection(item) {
+            console.log('Adding item to selection:', item);
+
+            // Check if already selected
+            const alreadySelected = selectedItems.find(selected => selected.id === item.id);
+            if (alreadySelected) {
+                showToast(`${item.name} already selected`, 'warning');
+                return;
+            }
+
+            // Add to selected items
+            selectedItems.push(item);
+            console.log('Selected items now:', selectedItems.length);
+
+            // Update display
+            updateSelectedTagsDisplay();
+            updateMultiSelectActions();
+
+            // Clear search and hide dropdown
+            const searchInput = document.getElementById('globalSearch');
+            const dropdown = document.getElementById('globalSearchDropdown');
+            const stats = document.getElementById('globalSearchStats');
+
+            if (searchInput) searchInput.value = '';
+            if (dropdown) dropdown.style.display = 'none';
+            if (stats) stats.textContent = 'Search across all categories • Use comma (,) or ENTER to add multiple items';
+
+            showToast(`${item.name} added to selection`, 'success');
+        }
+
+        // Update the tags display
+        function updateSelectedTagsDisplay() {
+            const container = document.getElementById('selectedTags');
+
+            if (selectedItems.length === 0) {
+                container.style.display = 'none';
+                container.innerHTML = ''; // Clear the container content
+                return;
+            }
+
+            container.style.display = 'flex';
+
+            let tagsHTML = '';
+            selectedItems.forEach((item, index) => {
+                tagsHTML += `
+                    <div class="search-tag">
+                        <span class="tag-name">${item.name}</span>
+                        <span class="tag-category">${item.category || 'General'}</span>
+                        <span class="tag-price">৳${item.price}</span>
+                        <button class="tag-remove" onclick="removeItemFromSelection(${index}); event.stopPropagation();">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = tagsHTML;
+        }
+
+        // Remove item from selection
+        function removeItemFromSelection(index) {
+            if (index >= 0 && index < selectedItems.length) {
+                const removedItem = selectedItems.splice(index, 1)[0];
+                updateSelectedTagsDisplay();
+                updateMultiSelectActions();
+                if (removedItem && removedItem.name) {
+                    showToast(`${removedItem.name} removed from selection`, 'info');
+                } else {
+                    showToast('Item removed from selection', 'info');
+                }
+            }
+        }
+
+        // Update multi-select action buttons
+        function updateMultiSelectActions() {
+            const actionsContainer = document.getElementById('multiSelectActions');
+            const selectedCount = document.getElementById('selectedCount');
+
+            if (selectedItems.length === 0) {
+                actionsContainer.style.display = 'none';
+                return;
+            }
+
+            actionsContainer.style.display = 'block';
+            selectedCount.textContent = selectedItems.length;
+        }
+
+        // Add all selected items to bill
+        function addAllSelectedItems() {
+            if (selectedItems.length === 0) {
+                showToast('No items selected', 'warning');
+                return;
+            }
+
+            let addedCount = 0;
+            selectedItems.forEach(item => {
+                try {
+                    addItemToBill(item);
+                    addedCount++;
+                } catch (error) {
+                    console.error('Error adding item to bill:', error);
+                }
+            });
+
+            showToast(`${addedCount} items added to bill`, 'success');
+            clearAllSelectedItems();
+        }
+
+        // Clear all selected items
+        function clearAllSelectedItems() {
+            selectedItems = [];
+            updateSelectedTagsDisplay();
+            updateMultiSelectActions();
+            document.getElementById('selectedItemsTotal').style.display = 'none';
+            showToast('Selection cleared', 'info');
+        }
+
+        // Show total preview for selected items
+        function showSelectedItemsTotal() {
+            if (selectedItems.length === 0) {
+                showToast('No items selected', 'warning');
+                return;
+            }
+
+            const total = selectedItems.reduce((sum, item) => sum + (item.price || 0), 0);
+            const totalElement = document.getElementById('totalPreview');
+            const totalContainer = document.getElementById('selectedItemsTotal');
+
+            totalElement.textContent = `৳${total.toFixed(2)}`;
+            totalContainer.style.display = 'block';
+        }
+
+        // Enhanced keydown handler for multi-select functionality
+        function handleGlobalSearchKeydown(event) {
+            const dropdown = document.getElementById('globalSearchDropdown');
+            const searchInput = document.getElementById('globalSearch');
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+
+                // Check if there's a search term
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm.length >= 2) {
+                    // Try to add the search term as a tag
+                    addTermAsTag(searchTerm);
+                    searchInput.value = '';
+                    dropdown.style.display = 'none';
+                } else {
+                    // If no search term, select first dropdown item
+                    const firstItem = dropdown.querySelector('.dropdown-item:not(.dropdown-item-empty)');
+                    if (firstItem) {
+                        firstItem.click();
+                    }
+                }
+            } else if (event.key === ',') {
+                event.preventDefault();
+
+                // Trigger the comma handling
+                const currentValue = searchInput.value.trim();
+                if (currentValue.length >= 2) {
+                    addTermAsTag(currentValue);
+                    searchInput.value = '';
+                    dropdown.style.display = 'none';
+                }
+            } else if (event.key === 'Escape') {
+                searchInput.value = '';
+                dropdown.style.display = 'none';
+                document.getElementById('globalSearchStats').textContent = 'Search across all categories • Use comma (,) or ENTER to add multiple items';
+            } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                // Handle dropdown navigation
+                event.preventDefault();
+                const items = dropdown.querySelectorAll('.dropdown-item:not(.dropdown-item-empty)');
+
+                if (items.length === 0) return;
+
+                let currentSelected = dropdown.querySelector('.dropdown-item.selected');
+                let currentIndex = currentSelected ? Array.from(items).indexOf(currentSelected) : -1;
+
+                // Remove current selection
+                if (currentSelected) currentSelected.classList.remove('selected');
+
+                // Calculate new index
+                if (event.key === 'ArrowDown') {
+                    currentIndex = (currentIndex + 1) % items.length;
+                } else {
+                    currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+                }
+
+                // Add selection to new item
+                items[currentIndex].classList.add('selected');
+            } else if (event.key === 'Backspace' && searchInput.value === '' && selectedItems.length > 0) {
+                // Remove last selected item when backspacing on empty input
+                event.preventDefault();
+                removeItemFromSelection(selectedItems.length - 1);
+            }
+        }
+
+        // Add event listener to close the dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const searchInput = document.getElementById('globalSearch');
+            const dropdown = document.getElementById('globalSearchDropdown');
+            if (event.target !== searchInput && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
+
+    <script>
+        // Function to handle OB button click
+        async function handleOB() {
+            try {
+                console.log('Fetching Off-Charge/OB items...');
+                const obItems = await window.dbAPI.getItemsByCategory('Off-Charge/OB');
+                console.log("OB Items from database:", obItems);
+
+                if (!obItems || obItems.length === 0) {
+                    showToast('No Off-Charge/OB items found in database', 'warning');
+                    return;
+                }
+
+                // Show the off-charge section
+                const offChargeSection = document.getElementById('offChargeSection');
+                if (offChargeSection) {
+                    offChargeSection.style.display = 'block';
+
+                    // Scroll to the section
+                    offChargeSection.scrollIntoView({ behavior: 'smooth' });
+                }
+
+                // Populate the items list
+                populateOffChargeItems(obItems);
+
+                showToast(`Found ${obItems.length} Off-Charge/OB services`, 'success');
+
+            } catch (error) {
+                console.error('Error fetching OB items:', error);
+                if (typeof showToast === 'function') {
+                    showToast('Failed to fetch OB items: ' + error.message, 'danger');
+                }
+            }
+        }
+
+        // Function to populate off-charge items with checkboxes
+        function populateOffChargeItems(items) {
+            const itemsList = document.getElementById('offChargeItemsList');
+            if (!itemsList) return;
+
+            let html = '';
+            items.forEach((item, index) => {
+                html += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="form-check" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 140, 200, 0.3); border-radius: 8px; padding: 12px; transition: all 0.3s ease;">
+                            <input class="form-check-input off-charge-checkbox" type="checkbox" value="${item.id}" id="offCharge_${item.id}" onchange="updateOffChargeSelection()">
+                            <label class="form-check-label w-100" for="offCharge_${item.id}" style="cursor: pointer;">
+                                <div style="color: white; font-weight: 600; font-size: 14px;">${item.name}</div>
+                                <div style="color: rgba(255, 255, 255, 0.8); font-size: 12px;">${item.type || 'Service'}</div>
+                                <div style="color: #ff8cc8; font-weight: 700; font-size: 13px;">৳${item.price}</div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+
+            itemsList.innerHTML = html;
+
+            // Store items globally for later use
+            window.currentOffChargeItems = items;
+
+            // Add hover effects
+            setTimeout(() => {
+                const checkboxContainers = itemsList.querySelectorAll('.form-check');
+                checkboxContainers.forEach(container => {
+                    container.addEventListener('mouseenter', function() {
+                        this.style.background = 'rgba(255, 140, 200, 0.2)';
+                        this.style.borderColor = 'rgba(255, 140, 200, 0.6)';
+                        this.style.transform = 'translateY(-2px)';
+                    });
+                    container.addEventListener('mouseleave', function() {
+                        this.style.background = 'rgba(255, 255, 255, 0.05)';
+                        this.style.borderColor = 'rgba(255, 140, 200, 0.3)';
+                        this.style.transform = 'translateY(0)';
+                    });
+                });
+            }, 100);
+        }
+
+        // Function to update off-charge selection
+        function updateOffChargeSelection() {
+            const checkboxes = document.querySelectorAll('.off-charge-checkbox:checked');
+            const addButton = document.getElementById('addOffChargeItemsBtn');
+
+            if (addButton) {
+                if (checkboxes.length > 0) {
+                    addButton.style.display = 'inline-block';
+                    addButton.innerHTML = `<i class="fas fa-plus-circle me-1"></i>Add Selected Items (${checkboxes.length}) to Bill`;
+                } else {
+                    addButton.style.display = 'none';
+                }
+            }
+        }
+
+        // Function to select all off-charge items
+        function selectAllOffChargeItems() {
+            const checkboxes = document.querySelectorAll('.off-charge-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateOffChargeSelection();
+            showToast('All Off-Charge items selected', 'success');
+        }
+
+        // Function to clear off-charge selection
+        function clearOffChargeSelection() {
+            const checkboxes = document.querySelectorAll('.off-charge-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateOffChargeSelection();
+            showToast('Selection cleared', 'info');
+        }
+
+        // Function to add selected off-charge items to bill
+        function addSelectedOffChargeItems() {
+            const checkboxes = document.querySelectorAll('.off-charge-checkbox:checked');
+
+            if (checkboxes.length === 0) {
+                showToast('Please select at least one Off-Charge/OB service', 'warning');
+                return;
+            }
+
+            let addedCount = 0;
+            checkboxes.forEach(checkbox => {
+                const itemId = parseInt(checkbox.value);
+                const item = window.currentOffChargeItems.find(r => r.id === itemId);
+
+                if (item) {
+                    const billItem = {
+                        id: Date.now() + Math.random(),
+                        category: item.category,
+                        name: item.name,
+                        type: item.type || 'Service',
+                        strength: item.strength || '',
+                        quantity: 1,
+                        price: item.price,
+                        totalPrice: item.price
+                    };
+
+                    if (typeof addItemToBill === 'function') {
+                        addItemToBill(billItem);
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                showToast(`Added ${addedCount} Off-Charge/OB service${addedCount !== 1 ? 's' : ''} to bill`, 'success');
+
+                // Clear selection and hide section
+                clearOffChargeSelection();
+                hideOffChargeSection();
+            }
+        }
+
+        // Function to hide off-charge section
+        function hideOffChargeSection() {
+            const offChargeSection = document.getElementById('offChargeSection');
+            if (offChargeSection) {
+                offChargeSection.style.display = 'none';
+            }
+
+            // Clear selection
+            clearOffChargeSelection();
+        }
+
+        // Make essential functions globally available
+        window.handleOB = handleOB;
+        window.populateOffChargeItems = populateOffChargeItems;
+        window.updateOffChargeSelection = updateOffChargeSelection;
+        window.selectAllOffChargeItems = selectAllOffChargeItems;
+        window.clearOffChargeSelection = clearOffChargeSelection;
+        window.addSelectedOffChargeItems = addSelectedOffChargeItems;
+        window.hideOffChargeSection = hideOffChargeSection;
+        window.togglePatientInfo = togglePatientInfo;
+    </script>
+</body>
+</html>
