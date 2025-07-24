@@ -891,20 +891,20 @@ function generateDynamicItemFields(categoryPath) {
     } else if (mainCategory === 'Baby Bed Fee(General)' || mainCategory === 'Baby Bed Fee(Private)') {
         // Baby Bed Fee categories only need Item Name and Price - no additional fields
     } else if (mainCategory === 'O2, ISO') {
-        fieldsHTML += `
-            <div class="oxygen-pricing-section mb-3">
-                <h6 style="color: var(--secondary); margin-bottom: 15px;">
-                    <i class="fas fa-lungs me-2"></i>Oxygen & ISO Pricing
-                </h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="oxygenUnit" class="form-label">
-                            O2 Unit <span style="color: var(--accent);">*</span>
-                        </label>
-                        <select class="form-select" id="oxygenUnit" required>
-                            <option value="">Select O2 unit...</option>
-                            <option value="45min">45 minutes (1 hour equivalent)</option>```text
-                            <option value="liter">Per Liter</option>
+            fieldsHTML += `
+                <div class="oxygen-pricing-section mb-3">
+                    <h6 style="color: var(--secondary); margin-bottom: 15px;">
+                        <i class="fas fa-lungs me-2"></i>Oxygen & ISO Pricing
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="oxygenUnit" class="form-label">
+                                O2 Unit <span style="color: var(--accent);">*</span>
+                            </label>
+                            <select class="form-select" id="oxygenUnit" required>
+                                <option value="">Select O2 unit...</option>
+                                <option value="45min">45 minutes (1 hour equivalent)</option>
+                                <option value="liter">Per Liter</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -1682,7 +1682,6 @@ async function updateItem(itemId) {
 
         // Reload items and reset form
         await loadCategoryItems(currentEditCategory);
-        ```text
         resetFormToAddMode();
 
     } catch (error) {
