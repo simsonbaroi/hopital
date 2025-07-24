@@ -672,40 +672,26 @@ function populateItemCategoryGrid() {
 
     let gridHTML = '';
 
-    // Create a flat array of all categories and subcategories
-    const allCategories = [];
+    // Define the exact order of categories as shown in the original image
+    const categoryOrder = [
+        'Registration', 'Admission Fee', 'Admission Fee Private', 'Dr. Fee', 'Medic Fee', 'Off-Charge/OB',
+        'Visitation General', 'Visitation Private', 'Lab', 'X-ray', 'Procedure', 'OR',
+        'Bed Fee General', 'Private Room Charges', 'Baby Bed Fee(General)', 'Baby Bed Fee(Private)', 'Medicine', 'O2, ISO'
+    ];
 
-    Object.entries(categoryHierarchy).forEach(([categoryName, categoryData]) => {
-        allCategories.push({
-            name: categoryName,
-            fullPath: categoryName,
-            icon: categoryData.icon,
-            color: categoryData.color
-        });
+    // Render categories in the specified order
+    categoryOrder.forEach(categoryName => {
+        const categoryData = categoryHierarchy[categoryName];
+        if (categoryData) {
+            const isActive = currentEditCategory === categoryName ? 'active' : '';
 
-        // Add subcategories if they exist
-        if (categoryData.subcategories && Object.keys(categoryData.subcategories).length > 0) {
-            Object.keys(categoryData.subcategories).forEach(subName => {
-                allCategories.push({
-                    name: subName,
-                    fullPath: `${categoryName} > ${subName}`,
-                    icon: categoryData.icon,
-                    color: categoryData.color
-                });
-            });
-        }
-    });
-
-    // Render all categories in a simple grid
-    allCategories.forEach(category => {
-        const isActive = currentEditCategory === category.fullPath ? 'active' : '';
-
-        gridHTML += `
-                <div class="export-button category-btn ${isActive}" onclick="selectItemCategory('${category.fullPath}')" data-category="${category.fullPath}">
-                    <i class="${category.icon}" style="color: ${category.color};"></i>
-                    <span>${category.displayName || category.name}</span>
+            gridHTML += `
+                <div class="export-button category-btn ${isActive}" onclick="selectItemCategory('${categoryName}')" data-category="${categoryName}">
+                    <i class="${categoryData.icon}" style="color: ${categoryData.color};"></i>
+                    <span>${categoryName}</span>
                 </div>
             `;
+        }
     });
 
     gridContainer.innerHTML = gridHTML;
