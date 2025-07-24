@@ -1,3 +1,19 @@
 
+# Flask Core
 flask==2.3.3
 flask-cors==4.0.0
+
+# Database
+mysql-connector-python==8.1.0
+PyMySQL==1.1.0
+SQLAlchemy==2.0.21
+Flask-SQLAlchemy==3.0.5
+
+# Configuration
+python-dotenv==1.0.0
+
+# Production server (optional)
+gunicorn==21.2.0
+
+# Development tools (optional)
+flask-migrate==4.0.5
