@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="styles.css">
-    
+
     <style>
         .standalone-container {
             background: rgba(15, 26, 74, 0.3);
@@ -21,7 +20,7 @@
             border: 1px solid rgba(0, 201, 167, 0.3);
             backdrop-filter: blur(15px);
         }
-        
+
         .item-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -30,18 +29,18 @@
             margin-bottom: 10px;
             transition: all 0.3s ease;
         }
-        
+
         .item-card:hover {
             background: rgba(0, 201, 167, 0.1);
             border-color: rgba(0, 201, 167, 0.3);
             transform: translateY(-2px);
         }
-        
+
         .item-actions {
             display: flex;
             gap: 5px;
         }
-        
+
         .action-btn {
             background: none;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -51,24 +50,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .action-btn:hover {
             background: rgba(0, 201, 167, 0.2);
             border-color: var(--secondary);
         }
-        
+
         .action-btn.edit:hover {
             background: rgba(255, 193, 7, 0.2);
             border-color: #ffc107;
             color: #ffc107;
         }
-        
+
         .action-btn.delete:hover {
             background: rgba(220, 53, 69, 0.2);
             border-color: #dc3545;
             color: #dc3545;
         }
-        
+
         .category-counter {
             background: rgba(0, 201, 167, 0.2);
             color: var(--secondary);
@@ -77,7 +76,7 @@
             font-size: 12px;
             font-weight: 600;
         }
-        
+
         .stats-card {
             background: linear-gradient(135deg, rgba(0, 201, 167, 0.1), rgba(15, 26, 74, 0.3));
             border: 1px solid rgba(0, 201, 167, 0.3);
@@ -86,19 +85,19 @@
             text-align: center;
             color: white;
         }
-        
+
         .stats-number {
             font-size: 32px;
             font-weight: 700;
             color: var(--secondary);
         }
-        
+
         .stats-label {
             font-size: 14px;
             opacity: 0.8;
             margin-top: 5px;
         }
-        
+
         .form-section {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -106,7 +105,7 @@
             padding: 20px;
             margin-bottom: 20px;
         }
-        
+
         .items-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -115,13 +114,13 @@
             overflow-y: auto;
             padding: 10px;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 40px;
             color: rgba(255, 255, 255, 0.6);
         }
-        
+
         .empty-state i {
             font-size: 48px;
             margin-bottom: 15px;
@@ -227,7 +226,7 @@
                     <i class="fas fa-layer-group me-2"></i>Select Category
                     <span class="category-counter" id="selectedCategoryCounter">None Selected</span>
                 </h4>
-                
+
                 <div class="category-buttons-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;">
                     <button class="export-button category-btn" data-category="Lab" onclick="selectStandaloneCategory('Lab')">
                         <i class="fas fa-flask" style="color: #74c0fc;"></i>
@@ -277,6 +276,14 @@
                         <i class="fas fa-door-open" style="color: #dc3545;"></i>
                         <span>Private Room</span>
                     </button>
+                    <button class="export-button category-btn" data-category="Medic Fee" onclick="selectStandaloneCategory('Medic Fee')">
+                        <i class="fas fa-user-nurse" style="color: #28a745;"></i>
+                        <span>Medic Fee</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Visitation General" onclick="selectStandaloneCategory('Visitation General')">
+                        <i class="fas fa-users" style="color: #6f42c1;"></i>
+                        <span>Visitation General</span>
+                    </button>
                 </div>
             </div>
 
@@ -285,7 +292,7 @@
                 <h4 id="formTitle">
                     <i class="fas fa-plus-circle me-2"></i>Add New Item
                 </h4>
-                
+
                 <div class="form-section">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -297,7 +304,7 @@
                             <input type="number" class="form-control" id="standaloneItemPrice" placeholder="0.00" step="0.01" min="0">
                         </div>
                     </div>
-                    
+
                     <div class="row g-3 mt-2">
                         <div class="col-md-4">
                             <label class="form-label">Type</label>
@@ -312,14 +319,14 @@
                             <input type="text" class="form-control" id="standaloneItemStrength" placeholder="e.g., 500mg">
                         </div>
                     </div>
-                    
+
                     <div class="row g-3 mt-2">
                         <div class="col-md-12">
                             <label class="form-label">Description</label>
                             <textarea class="form-control" id="standaloneItemDescription" rows="2" placeholder="Additional notes"></textarea>
                         </div>
                     </div>
-                    
+
                     <!-- X-ray Specific Fields -->
                     <div id="xrayFields" style="display: none;">
                         <hr class="my-3">
@@ -343,7 +350,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- O2, ISO Specific Fields -->
                     <div id="o2ISOFields" style="display: none;">
                         <hr class="my-3">
@@ -359,7 +366,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-4">
                         <button type="button" class="btn btn-primary me-3" onclick="addStandaloneItem()" id="addItemBtn">
                             <i class="fas fa-plus me-2"></i>Add Item
@@ -389,14 +396,14 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div id="itemsContainer">
                     <div class="empty-state" id="emptyItemsState">
                         <i class="fas fa-inbox"></i>
                         <h5>No items in this category</h5>
                         <p>Add your first item using the form above</p>
                     </div>
-                    
+
                     <div class="items-grid" id="itemsGrid" style="display: none;">
                         <!-- Items will be populated here -->
                     </div>
@@ -408,7 +415,7 @@
                 <h4 class="mb-3">
                     <i class="fas fa-tools me-2"></i>Bulk Operations
                 </h4>
-                
+
                 <div class="row g-3">
                     <div class="col-md-4">
                         <button class="btn btn-outline-primary w-100" onclick="generateSampleData()">
@@ -465,7 +472,7 @@
                 standaloneItems = {};
                 showToast('Standalone item manager initialized', 'success');
             }
-            
+
             updateStandaloneStats();
         }
 
@@ -484,27 +491,27 @@
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Set active state
             document.querySelector(`[data-category="${category}"]`).classList.add('active');
-            
+
             currentCategory = category;
             document.getElementById('selectedCategoryCounter').textContent = category;
-            
+
             // Show form and items sections
             document.getElementById('itemFormSection').style.display = 'block';
             document.getElementById('itemsDisplaySection').style.display = 'block';
-            
+
             // Update form title
             document.getElementById('formTitle').innerHTML = 
                 `<i class="fas fa-plus-circle me-2"></i>Add New Item to ${category}`;
-            
+
             // Show category-specific fields
             showCategorySpecificFields(category);
-            
+
             // Load items for this category
             loadStandaloneCategoryItems(category);
-            
+
             showToast(`${category} category selected`, 'success');
         }
 
@@ -512,7 +519,7 @@
             // Hide all specific fields first
             document.getElementById('xrayFields').style.display = 'none';
             document.getElementById('o2ISOFields').style.display = 'none';
-            
+
             // Show category-specific fields
             if (category === 'X-ray') {
                 document.getElementById('xrayFields').style.display = 'block';
@@ -524,17 +531,17 @@
         function addStandaloneItem() {
             const name = document.getElementById('standaloneItemName').value.trim();
             const price = parseFloat(document.getElementById('standaloneItemPrice').value) || 0;
-            
+
             if (!name || price <= 0) {
                 showToast('Please enter item name and valid price', 'warning');
                 return;
             }
-            
+
             if (!currentCategory) {
                 showToast('Please select a category first', 'warning');
                 return;
             }
-            
+
             const item = {
                 id: editingItemId || Date.now() + Math.random(),
                 category: currentCategory,
@@ -547,7 +554,7 @@
                 dateAdded: editingItemId ? standaloneItems[currentCategory]?.find(i => i.id === editingItemId)?.dateAdded : new Date().toISOString(),
                 lastModified: new Date().toISOString()
             };
-            
+
             // Add category-specific data
             if (currentCategory === 'X-ray') {
                 item.xrayPricing = {
@@ -564,12 +571,12 @@
                     price: parseFloat(document.getElementById('standaloneISOPrice').value) || 30
                 };
             }
-            
+
             // Initialize category if doesn't exist
             if (!standaloneItems[currentCategory]) {
                 standaloneItems[currentCategory] = [];
             }
-            
+
             if (editingItemId) {
                 // Update existing item
                 const index = standaloneItems[currentCategory].findIndex(i => i.id === editingItemId);
@@ -584,7 +591,7 @@
                 standaloneItems[currentCategory].push(item);
                 showToast(`${name} added successfully`, 'success');
             }
-            
+
             saveStandaloneData();
             resetStandaloneForm();
             loadStandaloneCategoryItems(currentCategory);
@@ -595,19 +602,19 @@
             const items = standaloneItems[category] || [];
             const itemsGrid = document.getElementById('itemsGrid');
             const emptyState = document.getElementById('emptyItemsState');
-            
+
             document.getElementById('itemsTitle').innerHTML = 
                 `<i class="fas fa-list me-2"></i>Items in ${category} (${items.length})`;
-            
+
             if (items.length === 0) {
                 itemsGrid.style.display = 'none';
                 emptyState.style.display = 'block';
                 return;
             }
-            
+
             emptyState.style.display = 'none';
             itemsGrid.style.display = 'grid';
-            
+
             let itemsHTML = '';
             items.forEach(item => {
                 itemsHTML += `
@@ -623,7 +630,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="row g-2 small">
                             <div class="col-6">
                                 <strong>Price:</strong> ৳${item.price}
@@ -642,7 +649,7 @@
                             </div>
                             ` : ''}
                         </div>
-                        
+
                         ${item.xrayPricing ? `
                         <div class="mt-2 small">
                             <strong>X-ray Pricing:</strong> 
@@ -650,7 +657,7 @@
                             OBLIQUE: ৳${item.xrayPricing.oblique}, BOTH: ৳${item.xrayPricing.both}
                         </div>
                         ` : ''}
-                        
+
                         ${item.oxygenPricing || item.isoPricing ? `
                         <div class="mt-2 small">
                             <strong>Service Pricing:</strong>
@@ -658,20 +665,20 @@
                             ${item.isoPricing ? `${item.oxygenPricing ? ', ' : ''}ISO: ৳${item.isoPricing.price}` : ''}
                         </div>
                         ` : ''}
-                        
+
                         ${item.description ? `
                         <div class="mt-2 small" style="opacity: 0.8;">
                             ${item.description}
                         </div>
                         ` : ''}
-                        
+
                         <div class="mt-2 small" style="opacity: 0.6;">
                             Added: ${new Date(item.dateAdded).toLocaleDateString()}
                         </div>
                     </div>
                 `;
             });
-            
+
             itemsGrid.innerHTML = itemsHTML;
         }
 
@@ -681,9 +688,9 @@
                 showToast('Item not found', 'error');
                 return;
             }
-            
+
             editingItemId = itemId;
-            
+
             // Populate form fields
             document.getElementById('standaloneItemName').value = item.name;
             document.getElementById('standaloneItemPrice').value = item.price;
@@ -691,7 +698,7 @@
             document.getElementById('standaloneItemQuantity').value = item.quantity || '';
             document.getElementById('standaloneItemStrength').value = item.strength || '';
             document.getElementById('standaloneItemDescription').value = item.description || '';
-            
+
             // Populate category-specific fields
             if (item.xrayPricing) {
                 document.getElementById('standaloneXrayAP').value = item.xrayPricing.ap || '';
@@ -699,22 +706,22 @@
                 document.getElementById('standaloneXrayOBLIQUE').value = item.xrayPricing.oblique || '';
                 document.getElementById('standaloneXrayBOTH').value = item.xrayPricing.both || '';
             }
-            
+
             if (item.oxygenPricing) {
                 document.getElementById('standaloneO2Price').value = item.oxygenPricing.price || '';
             }
-            
+
             if (item.isoPricing) {
                 document.getElementById('standaloneISOPrice').value = item.isoPricing.price || '';
             }
-            
+
             // Update UI for edit mode
             document.getElementById('formTitle').innerHTML = 
                 `<i class="fas fa-edit me-2"></i>Edit Item: ${item.name}`;
             document.getElementById('addItemBtn').innerHTML = 
                 '<i class="fas fa-save me-2"></i>Update Item';
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
-            
+
             showToast(`Editing: ${item.name}`, 'info');
         }
 
@@ -724,20 +731,20 @@
                 showToast('Item not found', 'error');
                 return;
             }
-            
+
             if (!confirm(`Are you sure you want to delete "${item.name}"?`)) {
                 return;
             }
-            
+
             const index = standaloneItems[currentCategory].findIndex(i => i.id == itemId);
             if (index > -1) {
                 standaloneItems[currentCategory].splice(index, 1);
-                
+
                 // Remove category if empty
                 if (standaloneItems[currentCategory].length === 0) {
                     delete standaloneItems[currentCategory];
                 }
-                
+
                 saveStandaloneData();
                 loadStandaloneCategoryItems(currentCategory);
                 updateStandaloneStats();
@@ -782,7 +789,7 @@
             let totalItems = 0;
             let categories = Object.keys(standaloneItems).length;
             let lastAdded = '--';
-            
+
             // Calculate total items and find last added
             let latestDate = 0;
             for (const category in standaloneItems) {
@@ -795,7 +802,7 @@
                     }
                 });
             }
-            
+
             document.getElementById('totalItemsStats').textContent = totalItems;
             document.getElementById('categoriesStats').textContent = categories;
             document.getElementById('lastAddedStats').textContent = lastAdded;
@@ -805,7 +812,7 @@
             if (!confirm('This will add sample data to your standalone system. Continue?')) {
                 return;
             }
-            
+
             const sampleData = {
                 'Lab': [
                     { id: Date.now() + 1, name: 'CBC', type: 'Blood Test', price: 450, description: 'Complete Blood Count', dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'Lab' },
@@ -819,7 +826,7 @@
                     { id: Date.now() + 5, name: 'Chest X-ray', type: 'Diagnostic', price: 800, xrayPricing: { ap: 800, lat: 900, oblique: 850, both: 1500 }, dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'X-ray' }
                 ]
             };
-            
+
             // Merge with existing data
             for (const category in sampleData) {
                 if (!standaloneItems[category]) {
@@ -827,14 +834,14 @@
                 }
                 standaloneItems[category].push(...sampleData[category]);
             }
-            
+
             saveStandaloneData();
             updateStandaloneStats();
-            
+
             if (currentCategory && sampleData[currentCategory]) {
                 loadStandaloneCategoryItems(currentCategory);
             }
-            
+
             showToast('Sample data generated successfully!', 'success');
         }
 
@@ -843,7 +850,7 @@
                 showToast('No items to export', 'warning');
                 return;
             }
-            
+
             const exportData = {
                 items: standaloneItems,
                 metadata: {
@@ -854,16 +861,16 @@
                     categories: Object.keys(standaloneItems).length
                 }
             };
-            
+
             const dataStr = JSON.stringify(exportData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const link = document.createElement('a');
             link.href = url;
             link.download = `standalone_hospital_items_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
+
             URL.revokeObjectURL(url);
             showToast('Items exported successfully!', 'success');
         }
@@ -875,12 +882,12 @@
         function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importData = JSON.parse(e.target.result);
-                    
+
                     if (importData.items) {
                         // Merge imported data
                         for (const category in importData.items) {
@@ -889,14 +896,14 @@
                             }
                             standaloneItems[category].push(...importData.items[category]);
                         }
-                        
+
                         saveStandaloneData();
                         updateStandaloneStats();
-                        
+
                         if (currentCategory && importData.items[currentCategory]) {
                             loadStandaloneCategoryItems(currentCategory);
                         }
-                        
+
                         showToast('Items imported successfully!', 'success');
                     } else {
                         showToast('Invalid file format', 'error');
@@ -906,7 +913,7 @@
                 }
             };
             reader.readAsText(file);
-            
+
             // Reset file input
             event.target.value = '';
         }
@@ -915,20 +922,20 @@
             if (!confirm('Are you sure you want to clear ALL items? This action cannot be undone!')) {
                 return;
             }
-            
+
             standaloneItems = {};
             currentCategory = '';
-            
+
             // Hide sections
             document.getElementById('itemFormSection').style.display = 'none';
             document.getElementById('itemsDisplaySection').style.display = 'none';
             document.getElementById('selectedCategoryCounter').textContent = 'None Selected';
-            
+
             // Clear active states
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             saveStandaloneData();
             updateStandaloneStats();
             showToast('All items cleared!', 'info');
@@ -936,11 +943,11 @@
 
         function clearCategoryItems() {
             if (!currentCategory) return;
-            
+
             if (!confirm(`Are you sure you want to clear all items from ${currentCategory}?`)) {
                 return;
             }
-            
+
             delete standaloneItems[currentCategory];
             saveStandaloneData();
             loadStandaloneCategoryItems(currentCategory);
@@ -953,7 +960,7 @@
                 showToast('No items in current category to export', 'warning');
                 return;
             }
-            
+
             const exportData = {
                 category: currentCategory,
                 items: standaloneItems[currentCategory],
@@ -962,16 +969,16 @@
                     itemCount: standaloneItems[currentCategory].length
                 }
             };
-            
+
             const dataStr = JSON.stringify(exportData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const link = document.createElement('a');
             link.href = url;
             link.download = `${currentCategory.replace(/[^a-zA-Z0-9]/g, '_')}_items_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
+
             URL.revokeObjectURL(url);
             showToast(`${currentCategory} items exported!`, 'success');
         }
@@ -982,18 +989,18 @@
 
         function viewStandaloneStats() {
             let statsText = 'Standalone System Statistics:\n\n';
-            
+
             let totalItems = 0;
             for (const category in standaloneItems) {
                 const count = standaloneItems[category].length;
                 totalItems += count;
                 statsText += `${category}: ${count} items\n`;
             }
-            
+
             statsText += `\nTotal Items: ${totalItems}`;
             statsText += `\nTotal Categories: ${Object.keys(standaloneItems).length}`;
             statsText += `\nSession Duration: ${document.getElementById('sessionTimeStats').textContent}`;
-            
+
             alert(statsText);
         }
 
@@ -1008,11 +1015,11 @@
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             `;
-            
+
             document.querySelector('.toast-container').appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);
             bsToast.show();
-            
+
             toast.addEventListener('hidden.bs.toast', () => {
                 toast.remove();
             });
