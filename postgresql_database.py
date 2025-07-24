@@ -97,14 +97,15 @@ class PostgreSQLHospitalDB:
                 # Use Replit's PostgreSQL database
                 logger.info("🔄 Connecting to Replit PostgreSQL database...")
                 
-                # Create SQLAlchemy engine with connection pooling
+                # Create SQLAlchemy engine with optimized connection pooling
                 self.engine = create_engine(
                     config['database_url'],
                     poolclass=QueuePool,
-                    pool_size=5,
-                    max_overflow=10,
+                    pool_size=10,
+                    max_overflow=20,
                     pool_pre_ping=True,
-                    pool_recycle=3600,
+                    pool_recycle=1800,
+                    pool_timeout=30,
                     echo=False
                 )
                 

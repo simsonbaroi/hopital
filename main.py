@@ -382,6 +382,31 @@ def get_database_info():
             'message': 'Failed to retrieve database information'
         }), 500
 
+@app.route('/api/database/backup', methods=['GET'])
+def backup_database():
+    """Export complete database backup"""
+    try:
+        backup_data = {
+            'timestamp': datetime.now().isoformat(),
+            'items': db.get_all_items(),
+            'bills': db.get_bills(1000),  # Last 1000 bills
+            'statistics': db.get_statistics(),
+            'database_info': db.get_connection_info()
+        }
+        
+        return jsonify({
+            'success': True,
+            'backup_data': backup_data,
+            'message': 'Database backup created successfully'
+        })
+    except Exception as e:
+        logger.error(f"Error in backup_database: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to create database backup'
+        }), 500
+
 @app.route('/api/<path:path>')
 def api_fallback(path):
     """Generic API endpoint fallback"""
@@ -426,12 +451,30 @@ def not_found(error):
 
 @app.errorhandler(500)
 def internal_error(error):
-    logger.error(f"Internal server error: {error}")
+    error_id = datetime.now().strftime('%Y%m%d-%H%M%S')
+    logger.error(f"Internal server error [{error_id}]: {error}")
+    logger.error(f"Request URL: {request.url}")
+    logger.error(f"Request method: {request.method}")
+    
     return jsonify({
         'error': 'Internal Server Error',
         'message': 'An internal server error occurred.',
+        'error_id': error_id,
         'status_code': 500
     }), 500
+
+@app.before_request
+def log_request_info():
+    """Log request information for debugging"""
+    if request.path.startswith('/api/'):
+        logger.info(f"API Request: {request.method} {request.path}")
+
+@app.after_request
+def log_response_info(response):
+    """Log response information"""
+    if request.path.startswith('/api/') and response.status_code >= 400:
+        logger.warning(f"API Error Response: {request.method} {request.path} -> {response.status_code}")
+    return response
 
 # Serve static files
 @app.route('/<path:filename>')
@@ -457,7 +500,7 @@ if __name__ == '__main__':
     print('   - Main Portal (Landing): http://0.0.0.0:5000/')
     print('   - Outpatient Billing: http://0.0.0.0:5000/index')
     print('   - Inpatient: http://0.0.0.0:5000/inpatient')
-    print('   - Price Editor: http://0.0.0.0/edit')
+    print('   - Price Editor: http://0.0.0.0:5000/edit')
     print('   - Health Check: http://0.0.0.0:5000/health')
     print('   - Database Info: http://0.0.0.0:5000/api/database/info')
     print('⚡ Professional Flask-PostgreSQL server ready!')
