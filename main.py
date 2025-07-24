@@ -6,7 +6,7 @@ import json
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
-from mysql_database import db
+from postgresql_database import db
 
 # Load environment variables
 load_dotenv()
@@ -39,7 +39,7 @@ def startup_info():
     """Log startup information"""
     logger.info("🏥 Hospital Billing System Flask Server Starting")
     db_info = db.get_connection_info()
-    logger.info(f"📊 Database: {db_info['database']} on {db_info['host']}:{db_info['port']}")
+    logger.info(f"📊 Database Type: {db_info['database_type']}")
     logger.info(f"🔗 Connected: {db_info['connected']}")
 
 # Call startup info immediately
@@ -85,11 +85,9 @@ def health():
         'message': 'Hospital Billing System Flask is running properly',
         'database': {
             'connected': db_info['connected'],
-            'host': db_info['host'],
-            'port': db_info['port'],
-            'database': db_info['database']
+            'database_type': db_info['database_type']
         },
-        'version': '3.0-mysql'
+        'version': '3.0-postgresql'
     })
 
 @app.route('/api/status')
@@ -99,13 +97,11 @@ def api_status():
     return jsonify({
         'server': 'online',
         'database': 'mysql' if db_info['connected'] else 'offline',
-        'version': '3.0-mysql-professional',
+        'version': '3.0-postgresql-professional',
         'timestamp': datetime.now().isoformat(),
-        'message': 'Professional Flask-MySQL Hospital Billing System',
+        'message': 'Professional Flask-PostgreSQL Hospital Billing System',
         'connection_info': {
-            'host': db_info['host'],
-            'port': db_info['port'],
-            'database': db_info['database'],
+            'database_type': db_info['database_type'],
             'connected': db_info['connected']
         }
     })
@@ -455,23 +451,23 @@ def static_files(filename):
         }), 404
 
 if __name__ == '__main__':
-    print('🏥 Professional Hospital Billing System - MySQL Edition')
+    print('🏥 Professional Hospital Billing System - PostgreSQL Edition')
     print('📍 Server running on: http://0.0.0.0:5000')
     print('🌐 Access URLs:')
     print('   - Main Portal (Landing): http://0.0.0.0:5000/')
     print('   - Outpatient Billing: http://0.0.0.0:5000/index')
     print('   - Inpatient: http://0.0.0.0:5000/inpatient')
-    print('   - Price Editor: http://0.0.0.0:5000/edit')
+    print('   - Price Editor: http://0.0.0.0/edit')
     print('   - Health Check: http://0.0.0.0:5000/health')
     print('   - Database Info: http://0.0.0.0:5000/api/database/info')
-    print('⚡ Professional Flask-MySQL server ready!')
-    print('💾 Using MySQL with SQLite fallback')
+    print('⚡ Professional Flask-PostgreSQL server ready!')
+    print('💾 Using Replit PostgreSQL with SQLite fallback')
     print('🔐 Professional error handling and logging enabled')
     print('🚀 Production-ready features active')
     
     # Display database connection info
     db_info = db.get_connection_info()
-    print(f'📊 Database: {db_info["database"]} on {db_info["host"]}:{db_info["port"]}')
+    print(f'📊 Database Type: {db_info["database_type"]}')
     print(f'🔗 Connected: {"✅" if db_info["connected"] else "❌"}')
     
     app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])

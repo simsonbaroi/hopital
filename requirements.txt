@@ -3,9 +3,8 @@
 flask==2.3.3
 flask-cors==4.0.0
 
-# Database
-mysql-connector-python==8.1.0
-PyMySQL==1.1.0
+# Database - PostgreSQL for Replit
+psycopg2-binary==2.9.9
 SQLAlchemy==2.0.21
 Flask-SQLAlchemy==3.0.5
 
