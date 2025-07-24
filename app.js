@@ -2086,6 +2086,11 @@ window.showItemInput = async function() {
             }
             
             await showXrayInput(xrayItems);
+        } else if (category === 'O2, ISO') {
+            console.log('Fetching O2, ISO items...');
+            const o2ISOItems = await getItemsByCategory('O2, ISO');
+            console.log('O2, ISO items fetched:', o2ISOItems);
+            await showO2ISOInput(o2ISOItems);
         } else {
             await showGenericInput(category);
         }
