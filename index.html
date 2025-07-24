@@ -555,45 +555,40 @@
                                     <i class="fas fa-undo me-1"></i>Reset
                                 </button>
                             </div>
-                            
-                            <!-- Compact Single-Line Buttons -->
-                            <div class="category-compact-container">
-                                <button class="category-compact-btn" data-category="Lab" onclick="selectCategoryFromList('Lab')" title="Laboratory Tests">
-                                    <i class="fas fa-flask"></i>
-                                    <span>Lab</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="OR" onclick="selectCategoryFromList('OR')" title="Operating Room">
-                                    <i class="fas fa-procedures"></i>
-                                    <span>OR</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="Medicine" onclick="selectCategoryFromList('Medicine')" title="Medicines & Pharmacy">
-                                    <i class="fas fa-pills"></i>
-                                    <span>Medicine</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="Procedure" onclick="selectCategoryFromList('Procedure')" title="Medical Procedures">
-                                    <i class="fas fa-stethoscope"></i>
-                                    <span>Procedure</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="X-ray" onclick="selectCategoryFromList('X-ray')" title="X-ray Imaging">
-                                    <i class="fas fa-x-ray"></i>
-                                    <span>X-ray</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="O2, ISO" onclick="selectCategoryFromList('O2, ISO')" title="Oxygen & ISO Therapy">
-                                    <i class="fas fa-lungs"></i>
-                                    <span>O2, ISO</span>
-                                </button>
-                                
-                                <button class="category-compact-btn" data-category="Limb and Brace" onclick="selectCategoryFromList('Limb and Brace')" title="Limb & Brace Equipment">
-                                    <i class="fas fa-hand-paper"></i>
-                                    <span>Limb & Brace</span>
-                                </button>
-                            </div>
-                            
+
+                            <!-- 6-Button Grid Layout -->
+                        <div class="category-buttons-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; width: 100%;">
+                            <button class="export-button category-btn" data-category="Lab" onclick="selectCategoryFromList('Lab')" title="Laboratory Tests">
+                                <i class="fas fa-flask" style="color: #74c0fc;"></i>
+                                <span>Lab</span>
+                            </button>
+
+                            <button class="export-button category-btn" data-category="OR" onclick="selectCategoryFromList('OR')" title="Operating Room">
+                                <i class="fas fa-procedures" style="color: #69db7c;"></i>
+                                <span>OR</span>
+                            </button>
+
+                            <button class="export-button category-btn" data-category="Medicine" onclick="selectCategoryFromList('Medicine')" title="Medicines & Pharmacy">
+                                <i class="fas fa-pills" style="color: #ffd43b;"></i>
+                                <span>Medicine</span>
+                            </button>
+
+                            <button class="export-button category-btn" data-category="Procedure" onclick="selectCategoryFromList('Procedure')" title="Medical Procedures">
+                                <i class="fas fa-stethoscope" style="color: #ff8cc8;"></i>
+                                <span>Procedure</span>
+                            </button>
+
+                            <button class="export-button category-btn" data-category="X-ray" onclick="selectCategoryFromList('X-ray')" title="X-ray Imaging">
+                                <i class="fas fa-x-ray" style="color: #51cf66;"></i>
+                                <span>X-ray</span>
+                            </button>
+
+                            <button class="export-button category-btn" data-category="Limb and Brace" onclick="selectCategoryFromList('Limb and Brace')" title="Limb & Brace Equipment">
+                                <i class="fas fa-hand-paper" style="color: #ff9776;"></i>
+                                <span>Limb & Brace</span>
+                            </button>
+                        </div>
+
                             <!-- Hidden select for compatibility -->
                             <select id="categorySelect" class="form-select" style="display: none;" onchange="showItemInput()">
                                 <option value="">-- Select Category --</option>
@@ -741,6 +736,7 @@
                                 <span class="info-label">Version</span>
                                 <span class="info-value">2.0 - LocalDB Only</span>
                             </div>
+<previous_generation>
                             <div class="info-item">
                                 <span class="info-label">Database</span>
                                 <span class="info-value" style="color: var(--secondary);">
@@ -1541,8 +1537,7 @@
             isMobileSidebarOpen = true;
 
             // Prevent body scroll when sidebar is open
-            document.body.style.overflow = 'hidden';
-        }
+            document.body.style.overflow = 'hidden';        }
 
         function closeMobileSidebar() {
             const sidebar = document.getElementById('mobileSidebar');
