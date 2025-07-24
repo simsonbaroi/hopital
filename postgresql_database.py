@@ -96,22 +96,40 @@ class PostgreSQLHospitalDB:
             try:
                 # Use Replit's PostgreSQL database
                 logger.info("🔄 Connecting to Replit PostgreSQL database...")
+                logger.info(f"📍 Database URL found: {'✅' if config['database_url'] else '❌'}")
                 
                 # Create SQLAlchemy engine with optimized connection pooling
                 self.engine = create_engine(
                     config['database_url'],
                     poolclass=QueuePool,
-                    pool_size=10,
-                    max_overflow=20,
+                    pool_size=5,
+                    max_overflow=10,
                     pool_pre_ping=True,
                     pool_recycle=1800,
                     pool_timeout=30,
-                    echo=False
+                    echo=False,
+                    connect_args={
+                        "connect_timeout": 30,
+                        "application_name": "Hospital_Billing_System"
+                    }
                 )
                 
-                # Test connection
-                with self.engine.connect() as conn:
-                    conn.execute(text("SELECT 1"))
+                # Test connection with retry logic
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        with self.engine.connect() as conn:
+                            result = conn.execute(text("SELECT 1 as test"))
+                            test_value = result.fetchone()[0]
+                            if test_value == 1:
+                                logger.info(f"✅ PostgreSQL connection test passed (attempt {attempt + 1})")
+                                break
+                    except Exception as retry_error:
+                        logger.warning(f"⚠️ Connection attempt {attempt + 1} failed: {retry_error}")
+                        if attempt == max_retries - 1:
+                            raise retry_error
+                        import time
+                        time.sleep(2 ** attempt)  # Exponential backoff
                 
                 self.SessionLocal = sessionmaker(bind=self.engine)
                 
@@ -120,16 +138,22 @@ class PostgreSQLHospitalDB:
                 
                 self.connected = True
                 logger.info("✅ Replit PostgreSQL connection established successfully")
+                logger.info("🗄️ Database tables created/verified")
                 
                 # Seed with sample data if needed
                 self._seed_sample_data()
                 return
                 
+            except (SQLAlchemyError, PostgreSQLError) as db_error:
+                logger.error(f"❌ PostgreSQL database error: {db_error}")
+                logger.info("🔄 Falling back to SQLite...")
             except Exception as e:
                 logger.error(f"❌ PostgreSQL connection failed: {e}")
                 logger.info("🔄 Falling back to SQLite...")
         else:
-            logger.info("ℹ️ No DATABASE_URL found, using SQLite fallback")
+            logger.info("ℹ️ No DATABASE_URL found in environment variables")
+            logger.info("💡 To use PostgreSQL: Create a database in the Replit Database tab")
+            logger.info("🔄 Using SQLite fallback...")
         
         # Fallback to SQLite
         self._fallback_to_sqlite(config['fallback_db'])

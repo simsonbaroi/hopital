@@ -79,15 +79,34 @@ def edit():
 def health():
     """Health check endpoint"""
     db_info = db.get_connection_info()
+    
+    # Determine overall health status
+    if db_info['connected']:
+        if db_info['database_type'] == 'PostgreSQL':
+            status = 'healthy'
+            message = 'System running with PostgreSQL'
+        else:
+            status = 'degraded'
+            message = 'System running with SQLite fallback - PostgreSQL unavailable'
+    else:
+        status = 'unhealthy'
+        message = 'Database connection failed'
+    
     return jsonify({
-        'status': 'healthy' if db_info['connected'] else 'degraded',
+        'status': status,
         'timestamp': datetime.now().isoformat(),
-        'message': 'Hospital Billing System Flask is running properly',
+        'message': message,
         'database': {
             'connected': db_info['connected'],
-            'database_type': db_info['database_type']
+            'database_type': db_info['database_type'],
+            'postgresql_available': db_info['database_type'] == 'PostgreSQL',
+            'environment_configured': bool(os.getenv('DATABASE_URL'))
         },
-        'version': '3.0-postgresql'
+        'version': '3.0-postgresql',
+        'recommendations': {
+            'setup_postgresql': not bool(os.getenv('DATABASE_URL')),
+            'message': 'Create a PostgreSQL database in Replit Database tab' if not bool(os.getenv('DATABASE_URL')) else 'PostgreSQL configured'
+        }
     })
 
 @app.route('/api/status')
@@ -369,6 +388,13 @@ def get_database_info():
     """Get database connection information"""
     try:
         db_info = db.get_connection_info()
+        
+        # Add environment variable status
+        db_info['environment'] = {
+            'DATABASE_URL_set': bool(os.getenv('DATABASE_URL')),
+            'DATABASE_URL_length': len(os.getenv('DATABASE_URL', '')) if os.getenv('DATABASE_URL') else 0
+        }
+        
         return jsonify({
             'success': True,
             'database_info': db_info,
@@ -380,6 +406,46 @@ def get_database_info():
             'success': False,
             'error': str(e),
             'message': 'Failed to retrieve database information'
+        }), 500
+
+@app.route('/api/database/test', methods=['GET'])
+def test_database_connection():
+    """Test database connection with detailed diagnostics"""
+    try:
+        # Test basic connection
+        db_info = db.get_connection_info()
+        
+        # Test query execution
+        test_results = {
+            'connection_status': db_info['connected'],
+            'database_type': db_info['database_type'],
+            'environment_check': {
+                'DATABASE_URL_exists': bool(os.getenv('DATABASE_URL')),
+                'DATABASE_URL_preview': os.getenv('DATABASE_URL', '')[:50] + '...' if os.getenv('DATABASE_URL') else None
+            }
+        }
+        
+        if db_info['connected']:
+            # Test a simple query
+            try:
+                stats = db.get_statistics()
+                test_results['query_test'] = 'passed'
+                test_results['item_count'] = stats.get('total_items', 0)
+            except Exception as query_error:
+                test_results['query_test'] = f'failed: {str(query_error)}'
+        
+        return jsonify({
+            'success': True,
+            'test_results': test_results,
+            'message': 'Database connection test completed'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in test_database_connection: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Database connection test failed'
         }), 500
 
 @app.route('/api/database/backup', methods=['GET'])
