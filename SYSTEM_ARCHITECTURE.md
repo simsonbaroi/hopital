@@ -1,4 +1,3 @@
-
 # 🏥 Hospital Billing System - Architecture Documentation
 
 ## 🚨 CRITICAL SYSTEM PRINCIPLE
@@ -149,3 +148,44 @@ Any code that attempts to:
 ---
 
 **Remember: The system structure is CODE-BASED, the data is DATABASE-BASED. Never mix these concerns.**
+
+## Database Architecture
+
+The system uses a dual-database approach:
+- **Primary**: PostgreSQL (professional production database)
+- **Fallback**: SQLite (local development and backup)
+
+### Recommended Database Options (Free Tier)
+
+1. **Replit Database (PostgreSQL)** - RECOMMENDED
+   - Fully integrated with Replit environment
+   - Professional PostgreSQL instance
+   - Automatic environment variable setup
+   - Best for production deployment
+
+2. **Supabase (PostgreSQL)**
+   - 500MB database, 2GB bandwidth/month
+   - Real-time features and dashboard
+   - REST API auto-generation
+
+3. **PlanetScale (MySQL)**
+   - 1GB storage, 1 billion row reads/month
+   - Serverless with branching capabilities
+   - Requires minor code adjustments for MySQL
+
+4. **Neon (PostgreSQL)**
+   - 512MB storage, 3GB transfer/month
+   - Serverless with auto-scaling
+   - Compatible with current setup
+
+### Database Connection Flow
+1. System attempts PostgreSQL connection using `DATABASE_URL`
+2. If PostgreSQL unavailable, falls back to SQLite
+3. All operations work identically regardless of database type
+
+### Setup Instructions
+For Replit Database:
+1. Open Database tab in Replit sidebar
+2. Create PostgreSQL database
+3. DATABASE_URL will be set automatically
+4. Restart the application - it will detect PostgreSQL
