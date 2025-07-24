@@ -97,15 +97,7 @@ app.get('/edit.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'edit.html'));
 });
 
-app.get('/edit-standalone', (req, res) => {
-    console.log('🔧 STANDALONE EDIT REQUEST: Serving edit-standalone.html');
-    res.sendFile(path.join(__dirname, 'edit-standalone.html'));
-});
 
-app.get('/edit-standalone.html', (req, res) => {
-    console.log('🔧 STANDALONE EDIT.HTML REQUEST: Serving edit-standalone.html');
-    res.sendFile(path.join(__dirname, 'edit-standalone.html'));
-});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
