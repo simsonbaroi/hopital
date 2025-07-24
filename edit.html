@@ -1,18 +1,133 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Billing System - Database Editor</title>
+    <title>Hospital Billing System - Standalone Item Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="styles.css">
-
-    <!-- Database Scripts -->
-    <script src="database-api.js"></script>
+    
+    <style>
+        .standalone-container {
+            background: rgba(15, 26, 74, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            backdrop-filter: blur(15px);
+        }
+        
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .item-card:hover {
+            background: rgba(0, 201, 167, 0.1);
+            border-color: rgba(0, 201, 167, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            padding: 5px 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0, 201, 167, 0.2);
+            border-color: var(--secondary);
+        }
+        
+        .action-btn.edit:hover {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        
+        .action-btn.delete:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .category-counter {
+            background: rgba(0, 201, 167, 0.2);
+            color: var(--secondary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, rgba(0, 201, 167, 0.1), rgba(15, 26, 74, 0.3));
+            border: 1px solid rgba(0, 201, 167, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .stats-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .stats-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    </style>
 </head>
 <body>
     <!-- Geometric Background -->
@@ -37,8 +152,8 @@
             <div class="logo">
                 <i class="fas fa-database"></i>
                 <div>
-                    <h1>Database Editor</h1>
-                    <p>Advanced Category & Pricing Management</p>
+                    <h1>Standalone Item Manager</h1>
+                    <p>In-System Item Management - No Database Required</p>
                 </div>
             </div>
             <nav class="nav-buttons">
@@ -46,528 +161,864 @@
                     <i class="fas fa-home"></i>
                     <span>Outpatient</span>
                 </a>
-                <a href="edit-standalone.html" class="nav-button">
-                    <i class="fas fa-cogs"></i>
-                    <span>Standalone Editor</span>
+                <a href="inpatient.html" class="nav-button">
+                    <i class="fas fa-bed"></i>
+                    <span>Inpatient</span>
                 </a>
             </nav>
         </div>
     </header>
 
-    <!-- Side Navigation Toggle -->
-    <div class="side-nav-toggle" onclick="toggleSideNav()">
-        <i class="fas fa-bars"></i>
-    </div>
-
-    <!-- Side Navigation Overlay -->
-    <div class="side-nav-overlay" onclick="closeSideNav()"></div>
-
-    <!-- Side Navigation Panel -->
-    <div class="side-nav-panel">
-        <div class="side-nav-header">
-            <h6 class="side-nav-title">Navigation</h6>
-            <div class="side-nav-close" onclick="closeSideNav()">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
-        <div class="side-nav-content">
-            <a href="index.html" class="side-nav-item">
-                <i class="fas fa-home"></i>
-                <span>Outpatient</span>
-            </a>
-            <a href="inpatient.html" class="side-nav-item">
-                <i class="fas fa-bed"></i>
-                <span>Inpatient</span>
-            </a>
-            <a href="edit.html" class="side-nav-item primary">
-                <i class="fas fa-edit"></i>
-                <span>Database</span>
-            </a>
-            <div class="side-nav-divider"></div>
-            <a href="landing.html" class="side-nav-item">
-                <i class="fas fa-arrow-left"></i>
-                <span>Back to Landing</span>
-            </a>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="container-fluid">
             <!-- Page Header -->
-            <div class="page-header">
-                <h2><i class="fas fa-edit me-3"></i>Advanced Database Management</h2>
-                <p>Manage categories, subcategories, items, and pricing structures</p>
-            </div>
-
-            <!-- Management Mode Tabs -->
-            <div class="management-tabs mb-4">
-                <ul class="nav nav-pills nav-fill" id="managementTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="category-management-tab" data-bs-toggle="pill" data-bs-target="#category-management" type="button" role="tab">
-                            <i class="fas fa-layer-group me-2"></i>Categories
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="item-management-tab" data-bs-toggle="pill" data-bs-target="#item-management" type="button" role="tab">
-                            <i class="fas fa-boxes me-2"></i>Items
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pricing-management-tab" data-bs-toggle="pill" data-bs-target="#pricing-management" type="button" role="tab">
-                            <i class="fas fa-dollar-sign me-2"></i>Pricing
-                        </button>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="tab-content" id="managementTabContent">
-
-                <!-- Category Management Tab -->
-                <div class="tab-pane fade show active" id="category-management" role="tabpanel">
-
-                    <!-- Category Tree View -->
-                    <div class="category-tree-section mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="section-title">
-                                <i class="fas fa-sitemap me-2"></i>Category Hierarchy
-                            </h4>
-                            <button class="btn btn-primary" onclick="addNewCategory()">
-                                <i class="fas fa-plus me-2"></i>Add Main Category
-                            </button>
-                        </div>
-
-                        <div class="category-tree" id="categoryTree">
-                            <!-- Category tree will be populated here -->
-                        </div>
+            <div class="standalone-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fas fa-cogs me-3"></i>Standalone Item Management</h2>
+                        <p class="mb-0">Manage items directly in this system without database dependency</p>
                     </div>
-
-                    <!-- Category Actions -->
-                    <div class="category-actions mb-4">
-                        <h5 class="section-title">
-                            <i class="fas fa-tools me-2"></i>Category Actions
-                        </h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="action-card">
-                                    <h6><i class="fas fa-edit me-2"></i>Rename Category</h6>
-                                    <select class="form-select mb-2" id="renameCategorySelect">
-                                        <option value="">Select category to rename...</option>
-                                    </select>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="newCategoryName" placeholder="New category name">
-                                        <button class="btn btn-outline-primary" onclick="renameCategory()">
-                                            <i class="fas fa-save"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="action-card">
-                                    <h6><i class="fas fa-plus me-2"></i>Add Subcategory</h6>
-                                    <select class="form-select mb-2" id="parentCategorySelect">
-                                        <option value="">Select parent category...</option>
-                                    </select>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="subcategoryName" placeholder="Subcategory name">
-                                        <button class="btn btn-outline-success" onclick="addSubcategory()">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-outline-success" onclick="exportStandaloneItems()">
+                            <i class="fas fa-download me-2"></i>Export Items
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="importStandaloneItems()">
+                            <i class="fas fa-upload me-2"></i>Import Items
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="clearAllStandaloneItems()">
+                            <i class="fas fa-trash me-2"></i>Clear All
+                        </button>
                     </div>
                 </div>
 
-                <!-- Item Management Tab -->
-                <div class="tab-pane fade" id="item-management" role="tabpanel">
-
-                    <!-- Category Selection for Items -->
-                    <div class="item-category-selection mb-4">
-                        <h4 class="section-title">
-                            <i class="fas fa-layer-group me-2"></i>Select Category for Item Management
-                        </h4>
-
-                        <div class="category-grid-container">
-                            <div class="category-buttons-grid" id="itemCategoryGrid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; width: 100%;">
-                            <!-- Categories will be populated dynamically by JavaScript -->
+                <!-- Statistics -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number" id="totalItemsStats">0</div>
+                            <div class="stats-label">Total Items</div>
                         </div>
                     </div>
-
-                    <!-- Add Item Form -->
-                    <div id="itemForm" style="display: none;" class="add-item-section">
-                        <div class="form-header">
-                            <h5 id="addItemTitle">
-                                <i class="fas fa-plus-circle me-2"></i>Add New Item
-                            </h5>
-                        </div>
-
-                        <!-- Dynamic Item Fields -->
-                        <div id="dynamicItemFields">
-                            <!-- Fields will be generated based on category type -->
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="form-actions mt-4">
-                            <button type="button" class="btn btn-glow me-3" onclick="addItem()">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Item</span>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
-                                <i class="fas fa-refresh"></i>
-                                <span>Reset</span>
-                            </button>
-                            <button type="button" class="btn btn-outline-info" id="quickSetupBtn" 
-                                    onclick="setupQuickItems()" style="display: none;">
-                                <i class="fas fa-magic"></i>
-                                <span>Quick Setup Items</span>
-                            </button>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number" id="categoriesStats">0</div>
+                            <div class="stats-label">Categories</div>
                         </div>
                     </div>
-
-                    <!-- Items Display -->
-                    <div id="itemsDisplaySection" style="display: none;" class="mt-4">
-                        <div class="category-info-header mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 style="color: var(--secondary); margin: 0;">
-                                    <i class="fas fa-list me-2"></i>Items in Category
-                                </h5>
-                                <div class="item-count-badge">
-                                    <span id="itemCount">0 items</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- No Items State -->
-                        <div id="noItemsInCategory" style="display: none;" class="text-center py-5">
-                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary); opacity: 0.5;"></i>
-                            <h5 class="mt-3" style="color: var(--secondary);">No items in this category</h5>
-                            <p style="color: rgba(255,255,255,0.7);">Add your first item using the form above</p>
-                        </div>
-
-                        <!-- Items Table -->
-                        <div id="itemsTableContainer" style="display: none;">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover">
-                                    <thead>
-                                        <tr id="tableHeaders">
-                                            <!-- Headers will be generated dynamically -->
-                                        </tr>
-                                    </thead>
-                                    <tbody id="itemTable">
-                                        <!-- Items will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Category Management Actions -->
-                            <div class="mt-3">
-                                <button type="button" class="btn btn-outline-warning me-2" onclick="clearCategory()">
-                                    <i class="fas fa-trash-alt me-2"></i>Clear Category
-                                </button>
-                            </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number" id="lastAddedStats">--</div>
+                            <div class="stats-label">Last Added</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Pricing Management Tab -->
-                <div class="tab-pane fade" id="pricing-management" role="tabpanel">
-
-                    <!-- Bulk Pricing Operations -->
-                    <div class="pricing-operations mb-4">
-                        <h4 class="section-title">
-                            <i class="fas fa-calculator me-2"></i>Pricing Operations
-                        </h4>
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="action-card">
-                                    <h6><i class="fas fa-percentage me-2"></i>Bulk Price Adjustment</h6>
-                                    <select class="form-select mb-2" id="pricingCategorySelect">
-                                        <option value="">Select category...</option>
-                                    </select>
-                                    <div class="row g-2">
-                                        <div class="col-8">
-                                            <input type="number" class="form-control" id="priceAdjustment" placeholder="Adjustment %" step="0.1">
-                                        </div>
-                                        <div class="col-4">
-                                            <button class="btn btn-outline-primary w-100" onclick="adjustCategoryPricing()">
-                                                <i class="fas fa-calculator"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="action-card">
-                                    <h6><i class="fas fa-copy me-2"></i>Copy Pricing Structure</h6>
-                                    <select class="form-select mb-2" id="sourceCategorySelect">
-                                        <option value="">Source category...</option>
-                                    </select>
-                                    <select class="form-select mb-2" id="targetCategorySelect">
-                                        <option value="">Target category...</option>
-                                    </select>
-                                    <button class="btn btn-outline-success w-100" onclick="copyPricingStructure()">
-                                        <i class="fas fa-copy me-2"></i>Copy Prices
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pricing Templates -->
-                    <div class="pricing-templates mb-4">
-                        <h5 class="section-title">
-                            <i class="fas fa-template me-2"></i>Pricing Templates
-                        </h5>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="template-card" onclick="applyPricingTemplate('basic')">
-                                    <i class="fas fa-star"></i>
-                                    <h6>Basic Healthcare</h6>
-                                    <p>Standard pricing for basic services</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="template-card" onclick="applyPricingTemplate('premium')">
-                                    <i class="fas fa-crown"></i>
-                                    <h6>Premium Services</h6>
-                                    <p>Higher pricing for premium care</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="template-card" onclick="applyPricingTemplate('emergency')">
-                                    <i class="fas fa-bolt"></i>
-                                    <h6>Emergency Care</h6>
-                                    <p>Emergency service pricing</p>
-                                </div>
-                            </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <div class="stats-number" id="sessionTimeStats">00:00</div>
+                            <div class="stats-label">Session Time</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- No Category Selected State -->
-            <div id="noCategorySelected" class="text-center py-5" style="display: none;">
-                <i class="fas fa-arrow-up" style="font-size: 3rem; color: var(--secondary); opacity: 0.5;"></i>
-                <h5 class="mt-3" style="color: var(--secondary);">Select a category above to start editing</h5>
-                <p style="color: rgba(255,255,255,0.7);">Choose from the options to view and manage items in that category</p>
-            </div>
-
-            <!-- Management Tools -->
-            <div class="management-tools mt-5">
-                <h5 class="section-title">
-                    <i class="fas fa-tools me-2"></i>Database Management Tools
-                </h5>
-
-                <div class="category-buttons-grid">
-                    <div class="export-button" onclick="exportDatabase()">
-                        <i class="fas fa-download" style="color: #69db7c;"></i>
-                        <span>Export Database</span>
-                    </div>
-                    <div class="export-button" onclick="triggerImportFile()">
-                        <i class="fas fa-upload" style="color: #74c0fc;"></i>
-                        <span>Import Data</span>
-                    </div>
-                    <div class="export-button" onclick="cleanupDuplicates()">
-                        <i class="fas fa-broom" style="color: #ffd43b;"></i>
-                        <span>Cleanup Duplicates</span>
-                    </div>
-                    <div class="export-button" onclick="exportCategoryStructure()">
-                        <i class="fas fa-sitemap" style="color: #51cf66;"></i>
-                        <span>Export Structure</span>
-                    </div>
-                    <div class="export-button" onclick="clearAndSetupBedCabinCharges()">
-                        <i class="fas fa-bed" style="color: #ff8cc8;"></i>
-                        <span>Setup Bed/Cabin</span>
-                    </div>
-                    <div class="export-button" onclick="showO2ISOModal()">
+            <!-- Category Selection -->
+            <div class="standalone-container">
+                <h4 class="mb-3">
+                    <i class="fas fa-layer-group me-2"></i>Select Category
+                    <span class="category-counter" id="selectedCategoryCounter">None Selected</span>
+                </h4>
+                
+                <div class="category-buttons-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;">
+                    <button class="export-button category-btn" data-category="Lab" onclick="selectStandaloneCategory('Lab')">
+                        <i class="fas fa-flask" style="color: #74c0fc;"></i>
+                        <span>Lab</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="OR" onclick="selectStandaloneCategory('OR')">
+                        <i class="fas fa-procedures" style="color: #69db7c;"></i>
+                        <span>OR</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Medicine" onclick="selectStandaloneCategory('Medicine')">
+                        <i class="fas fa-pills" style="color: #ffd43b;"></i>
+                        <span>Medicine</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Procedure" onclick="selectStandaloneCategory('Procedure')">
+                        <i class="fas fa-stethoscope" style="color: #ff8cc8;"></i>
+                        <span>Procedure</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="X-ray" onclick="selectStandaloneCategory('X-ray')">
+                        <i class="fas fa-x-ray" style="color: #51cf66;"></i>
+                        <span>X-ray</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="O2, ISO" onclick="selectStandaloneCategory('O2, ISO')">
                         <i class="fas fa-lungs" style="color: #4dabf7;"></i>
                         <span>O2, ISO</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Limb and Brace" onclick="selectStandaloneCategory('Limb and Brace')">
+                        <i class="fas fa-hand-paper" style="color: #ff9776;"></i>
+                        <span>Limb & Brace</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Registration" onclick="selectStandaloneCategory('Registration')">
+                        <i class="fas fa-user-plus" style="color: #845ef7;"></i>
+                        <span>Registration</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Dr. Fee" onclick="selectStandaloneCategory('Dr. Fee')">
+                        <i class="fas fa-user-md" style="color: #20c997;"></i>
+                        <span>Dr. Fee</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Admission Fee" onclick="selectStandaloneCategory('Admission Fee')">
+                        <i class="fas fa-hospital-user" style="color: #ff6b6b;"></i>
+                        <span>Admission Fee</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Bed Fee General" onclick="selectStandaloneCategory('Bed Fee General')">
+                        <i class="fas fa-bed" style="color: #17a2b8;"></i>
+                        <span>Bed Fee General</span>
+                    </button>
+                    <button class="export-button category-btn" data-category="Private Room Charges" onclick="selectStandaloneCategory('Private Room Charges')">
+                        <i class="fas fa-door-open" style="color: #dc3545;"></i>
+                        <span>Private Room</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Item Form -->
+            <div class="standalone-container" id="itemFormSection" style="display: none;">
+                <h4 id="formTitle">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Item
+                </h4>
+                
+                <div class="form-section">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Item Name <span style="color: var(--secondary);">*</span></label>
+                            <input type="text" class="form-control" id="standaloneItemName" placeholder="Enter item name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Price (৳) <span style="color: var(--secondary);">*</span></label>
+                            <input type="number" class="form-control" id="standaloneItemPrice" placeholder="0.00" step="0.01" min="0">
+                        </div>
                     </div>
-                    <div class="export-button danger" onclick="clearAllDatabase()">
-                        <i class="fas fa-trash" style="color: #ff6b6b;"></i>
-                        <span>Clear All Data</span>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label">Type</label>
+                            <input type="text" class="form-control" id="standaloneItemType" placeholder="Item type">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity</label>
+                            <input type="text" class="form-control" id="standaloneItemQuantity" placeholder="e.g., 10 pcs">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Strength</label>
+                            <input type="text" class="form-control" id="standaloneItemStrength" placeholder="e.g., 500mg">
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="standaloneItemDescription" rows="2" placeholder="Additional notes"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- X-ray Specific Fields -->
+                    <div id="xrayFields" style="display: none;">
+                        <hr class="my-3">
+                        <h6 style="color: var(--secondary);">X-ray View Pricing</h6>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">AP View (৳)</label>
+                                <input type="number" class="form-control" id="standaloneXrayAP" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">LAT View (৳)</label>
+                                <input type="number" class="form-control" id="standaloneXrayLAT" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">OBLIQUE View (৳)</label>
+                                <input type="number" class="form-control" id="standaloneXrayOBLIQUE" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">BOTH Views (৳)</label>
+                                <input type="number" class="form-control" id="standaloneXrayBOTH" placeholder="0.00" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- O2, ISO Specific Fields -->
+                    <div id="o2ISOFields" style="display: none;">
+                        <hr class="my-3">
+                        <h6 style="color: var(--secondary);">O2 & ISO Pricing</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">O2 Unit Price (৳)</label>
+                                <input type="number" class="form-control" id="standaloneO2Price" placeholder="130" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ISO Unit Price (৳)</label>
+                                <input type="number" class="form-control" id="standaloneISOPrice" placeholder="30" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary me-3" onclick="addStandaloneItem()" id="addItemBtn">
+                            <i class="fas fa-plus me-2"></i>Add Item
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary me-3" onclick="resetStandaloneForm()">
+                            <i class="fas fa-refresh me-2"></i>Reset
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" onclick="cancelEditStandalone()" id="cancelEditBtn" style="display: none;">
+                            <i class="fas fa-times me-2"></i>Cancel Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Display -->
+            <div class="standalone-container" id="itemsDisplaySection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 id="itemsTitle">
+                        <i class="fas fa-list me-2"></i>Items in Category
+                    </h4>
+                    <div>
+                        <button class="btn btn-outline-info btn-sm me-2" onclick="exportCategoryItems()">
+                            <i class="fas fa-download me-1"></i>Export Category
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearCategoryItems()">
+                            <i class="fas fa-trash me-1"></i>Clear Category
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="itemsContainer">
+                    <div class="empty-state" id="emptyItemsState">
+                        <i class="fas fa-inbox"></i>
+                        <h5>No items in this category</h5>
+                        <p>Add your first item using the form above</p>
+                    </div>
+                    
+                    <div class="items-grid" id="itemsGrid" style="display: none;">
+                        <!-- Items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Operations -->
+            <div class="standalone-container">
+                <h4 class="mb-3">
+                    <i class="fas fa-tools me-2"></i>Bulk Operations
+                </h4>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-primary w-100" onclick="generateSampleData()">
+                            <i class="fas fa-magic me-2"></i>Generate Sample Data
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-success w-100" onclick="exportAllStandaloneData()">
+                            <i class="fas fa-file-export me-2"></i>Export All Data
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-info w-100" onclick="viewStandaloneStats()">
+                            <i class="fas fa-chart-bar me-2"></i>View Statistics
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Quick Navigation Section -->
-    <div class="quick-navigation-section">
-        <div class="container-fluid">
-            <div class="quick-nav-container">
-                <a href="index.html" class="quick-nav-btn">
-                    <i class="fas fa-user-injured"></i>
-                    <span>Outpatient</span>
-                </a>
-                <a href="inpatient.html" class="quick-nav-btn">
-                    <i class="fas fa-bed"></i>
-                    <span>Inpatient</span>
-                </a>
-                <a href="edit.html" class="quick-nav-btn active">
-                    <i class="fas fa-database"></i>
-                    <span>Database</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <p>&copy; 2025 Hospital Billing System. Advanced Database Management with Hierarchical Categories.</p>
-    </div>
-
-    <!-- Modals -->
-
-    <!-- Add Category Modal -->
-    <div class="modal fade" id="addCategoryModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add New Category</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addCategoryForm">
-                        <div class="mb-3">
-                            <label for="categoryName" class="form-label">Category Name</label>
-                            <input type="text" class="form-control" id="categoryName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="categoryIcon" class="form-label">Icon (FontAwesome class)</label>
-                            <input type="text" class="form-control" id="categoryIcon" placeholder="fas fa-pills">
-                        </div>
-                        <div class="mb-3">
-                            <label for="categoryColor" class="form-label">Color</label>
-                            <input type="color" class="form-control" id="categoryColor" value="#74c0fc">
-                        </div>
-                        <div class="mb-3">
-                            <label for="categoryType" class="form-label">Category Type</label>
-                            <select class="form-select" id="categoryType">
-                                <option value="standard">Standard Items</option>
-                                <option value="medicine">Medicine</option>
-                                <option value="xray">X-ray Services</option>
-                                <option value="room">Room Services</option>
-                                <option value="procedure">Procedures</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveCategoryModal()">Add Category</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden file input for imports -->
-    <input type="file" id="fileInput" style="display: none;" accept=".json,.xlsx,.xls">
-
-    <!-- O2, ISO Modal -->
-    <div class="modal fade" id="o2ISOModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-lungs me-2"></i>O2, ISO Configuration</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Default System Rates:</strong> O2: 2L/hour at ৳130 | ISO: ৳30/minute
-                    </div>
-                    <form id="o2ISOForm">
-                        <div class="mb-4">
-                            <h6 class="text-secondary mb-3"><i class="fas fa-wind me-2"></i>O2 Configuration</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="o2BaseHour" class="form-label">O2 Per Hour <small class="text-muted">(Default: 1 hour)</small></label>
-                                    <input type="number" class="form-control" id="o2BaseHour" step="0.01" min="0" placeholder="1">
-                                    <small class="form-text text-muted">Enter 1 for per hour pricing</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="o2BaseRate" class="form-label">O2 Rate (৳) <small class="text-muted">(Default: ৳130)</small></label>
-                                    <input type="number" class="form-control" id="o2BaseRate" step="0.01" min="0" placeholder="130">
-                                    <small class="form-text text-muted">Rate for 2L oxygen per hour</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <h6 class="text-secondary mb-3"><i class="fas fa-lungs me-2"></i>ISO Configuration</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="isoBaseHour" class="form-label">ISO Per Minute <small class="text-muted">(Default: 0.0167 hour)</small></label>
-                                    <input type="number" class="form-control" id="isoBaseHour" step="0.0001" min="0" placeholder="0.0167">
-                                    <small class="form-text text-muted">0.0167 = 1 minute in hours</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="isoBaseRate" class="form-label">ISO Rate (৳) <small class="text-muted">(Default: ৳30)</small></label>
-                                    <input type="number" class="form-control" id="isoBaseRate" step="0.01" min="0" placeholder="30">
-                                    <small class="form-text text-muted">Rate per minute</small>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveO2ISOEntry()">Add to Database</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-        <div class="text-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-            <p class="mt-3" style="color: white;">Processing...</p>
-        </div>
-    </div>
+    <!-- Hidden file input -->
+    <input type="file" id="importFileInput" style="display: none;" accept=".json,.xlsx" onchange="handleFileImport(event)">
 
     <!-- Toast Container -->
     <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
-    <!-- Scripts -->
-    <script src="local-database.js"></script>
-    <script src="database-api.js"></script>
-    <script src="flask-database-api.js"></script>
-    <script src="edit-app.js"></script>
-
     <script>
-        // Side navigation functionality
-        function toggleSideNav() {
-            const overlay = document.querySelector('.side-nav-overlay');
-            const panel = document.querySelector('.side-nav-panel');
+        // Global variables for standalone system
+        let standaloneItems = {};
+        let currentCategory = '';
+        let editingItemId = null;
+        let sessionStartTime = Date.now();
+        let sessionTimer;
 
-            if (overlay && panel) {
-                overlay.classList.add('active');
-                panel.classList.add('active');
+        // Initialize standalone system
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStandaloneSystem();
+            startSessionTimer();
+        });
+
+        function initializeStandaloneSystem() {
+            // Load items from localStorage if available
+            const savedItems = localStorage.getItem('standaloneHospitalItems');
+            if (savedItems) {
+                try {
+                    standaloneItems = JSON.parse(savedItems);
+                    showToast('Previous session data loaded', 'info');
+                } catch (e) {
+                    standaloneItems = {};
+                    showToast('Starting with empty data', 'info');
+                }
+            } else {
+                standaloneItems = {};
+                showToast('Standalone item manager initialized', 'success');
+            }
+            
+            updateStandaloneStats();
+        }
+
+        function startSessionTimer() {
+            sessionTimer = setInterval(() => {
+                const elapsed = Date.now() - sessionStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('sessionTimeStats').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function selectStandaloneCategory(category) {
+            // Clear active states
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Set active state
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            
+            currentCategory = category;
+            document.getElementById('selectedCategoryCounter').textContent = category;
+            
+            // Show form and items sections
+            document.getElementById('itemFormSection').style.display = 'block';
+            document.getElementById('itemsDisplaySection').style.display = 'block';
+            
+            // Update form title
+            document.getElementById('formTitle').innerHTML = 
+                `<i class="fas fa-plus-circle me-2"></i>Add New Item to ${category}`;
+            
+            // Show category-specific fields
+            showCategorySpecificFields(category);
+            
+            // Load items for this category
+            loadStandaloneCategoryItems(category);
+            
+            showToast(`${category} category selected`, 'success');
+        }
+
+        function showCategorySpecificFields(category) {
+            // Hide all specific fields first
+            document.getElementById('xrayFields').style.display = 'none';
+            document.getElementById('o2ISOFields').style.display = 'none';
+            
+            // Show category-specific fields
+            if (category === 'X-ray') {
+                document.getElementById('xrayFields').style.display = 'block';
+            } else if (category === 'O2, ISO') {
+                document.getElementById('o2ISOFields').style.display = 'block';
             }
         }
 
-        function closeSideNav() {
-            const overlay = document.querySelector('.side-nav-overlay');
-            const panel = document.querySelector('.side-nav-panel');
+        function addStandaloneItem() {
+            const name = document.getElementById('standaloneItemName').value.trim();
+            const price = parseFloat(document.getElementById('standaloneItemPrice').value) || 0;
+            
+            if (!name || price <= 0) {
+                showToast('Please enter item name and valid price', 'warning');
+                return;
+            }
+            
+            if (!currentCategory) {
+                showToast('Please select a category first', 'warning');
+                return;
+            }
+            
+            const item = {
+                id: editingItemId || Date.now() + Math.random(),
+                category: currentCategory,
+                name: name,
+                price: price,
+                type: document.getElementById('standaloneItemType').value.trim(),
+                quantity: document.getElementById('standaloneItemQuantity').value.trim(),
+                strength: document.getElementById('standaloneItemStrength').value.trim(),
+                description: document.getElementById('standaloneItemDescription').value.trim(),
+                dateAdded: editingItemId ? standaloneItems[currentCategory]?.find(i => i.id === editingItemId)?.dateAdded : new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            // Add category-specific data
+            if (currentCategory === 'X-ray') {
+                item.xrayPricing = {
+                    ap: parseFloat(document.getElementById('standaloneXrayAP').value) || 0,
+                    lat: parseFloat(document.getElementById('standaloneXrayLAT').value) || 0,
+                    oblique: parseFloat(document.getElementById('standaloneXrayOBLIQUE').value) || 0,
+                    both: parseFloat(document.getElementById('standaloneXrayBOTH').value) || 0
+                };
+            } else if (currentCategory === 'O2, ISO') {
+                item.oxygenPricing = {
+                    price: parseFloat(document.getElementById('standaloneO2Price').value) || 130
+                };
+                item.isoPricing = {
+                    price: parseFloat(document.getElementById('standaloneISOPrice').value) || 30
+                };
+            }
+            
+            // Initialize category if doesn't exist
+            if (!standaloneItems[currentCategory]) {
+                standaloneItems[currentCategory] = [];
+            }
+            
+            if (editingItemId) {
+                // Update existing item
+                const index = standaloneItems[currentCategory].findIndex(i => i.id === editingItemId);
+                if (index > -1) {
+                    standaloneItems[currentCategory][index] = item;
+                    showToast(`${name} updated successfully`, 'success');
+                }
+                editingItemId = null;
+                cancelEditStandalone();
+            } else {
+                // Add new item
+                standaloneItems[currentCategory].push(item);
+                showToast(`${name} added successfully`, 'success');
+            }
+            
+            saveStandaloneData();
+            resetStandaloneForm();
+            loadStandaloneCategoryItems(currentCategory);
+            updateStandaloneStats();
+        }
 
-            if (overlay && panel) {
-                overlay.classList.remove('active');
-                panel.classList.remove('active');
+        function loadStandaloneCategoryItems(category) {
+            const items = standaloneItems[category] || [];
+            const itemsGrid = document.getElementById('itemsGrid');
+            const emptyState = document.getElementById('emptyItemsState');
+            
+            document.getElementById('itemsTitle').innerHTML = 
+                `<i class="fas fa-list me-2"></i>Items in ${category} (${items.length})`;
+            
+            if (items.length === 0) {
+                itemsGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            itemsGrid.style.display = 'grid';
+            
+            let itemsHTML = '';
+            items.forEach(item => {
+                itemsHTML += `
+                    <div class="item-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-1" style="color: var(--secondary);">${item.name}</h6>
+                            <div class="item-actions">
+                                <button class="action-btn edit" onclick="editStandaloneItem('${item.id}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteStandaloneItem('${item.id}')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2 small">
+                            <div class="col-6">
+                                <strong>Price:</strong> ৳${item.price}
+                            </div>
+                            <div class="col-6">
+                                <strong>Type:</strong> ${item.type || 'N/A'}
+                            </div>
+                            ${item.quantity ? `
+                            <div class="col-6">
+                                <strong>Quantity:</strong> ${item.quantity}
+                            </div>
+                            ` : ''}
+                            ${item.strength ? `
+                            <div class="col-6">
+                                <strong>Strength:</strong> ${item.strength}
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${item.xrayPricing ? `
+                        <div class="mt-2 small">
+                            <strong>X-ray Pricing:</strong> 
+                            AP: ৳${item.xrayPricing.ap}, LAT: ৳${item.xrayPricing.lat}, 
+                            OBLIQUE: ৳${item.xrayPricing.oblique}, BOTH: ৳${item.xrayPricing.both}
+                        </div>
+                        ` : ''}
+                        
+                        ${item.oxygenPricing || item.isoPricing ? `
+                        <div class="mt-2 small">
+                            <strong>Service Pricing:</strong>
+                            ${item.oxygenPricing ? `O2: ৳${item.oxygenPricing.price}` : ''}
+                            ${item.isoPricing ? `${item.oxygenPricing ? ', ' : ''}ISO: ৳${item.isoPricing.price}` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${item.description ? `
+                        <div class="mt-2 small" style="opacity: 0.8;">
+                            ${item.description}
+                        </div>
+                        ` : ''}
+                        
+                        <div class="mt-2 small" style="opacity: 0.6;">
+                            Added: ${new Date(item.dateAdded).toLocaleDateString()}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            itemsGrid.innerHTML = itemsHTML;
+        }
+
+        function editStandaloneItem(itemId) {
+            const item = standaloneItems[currentCategory]?.find(i => i.id == itemId);
+            if (!item) {
+                showToast('Item not found', 'error');
+                return;
+            }
+            
+            editingItemId = itemId;
+            
+            // Populate form fields
+            document.getElementById('standaloneItemName').value = item.name;
+            document.getElementById('standaloneItemPrice').value = item.price;
+            document.getElementById('standaloneItemType').value = item.type || '';
+            document.getElementById('standaloneItemQuantity').value = item.quantity || '';
+            document.getElementById('standaloneItemStrength').value = item.strength || '';
+            document.getElementById('standaloneItemDescription').value = item.description || '';
+            
+            // Populate category-specific fields
+            if (item.xrayPricing) {
+                document.getElementById('standaloneXrayAP').value = item.xrayPricing.ap || '';
+                document.getElementById('standaloneXrayLAT').value = item.xrayPricing.lat || '';
+                document.getElementById('standaloneXrayOBLIQUE').value = item.xrayPricing.oblique || '';
+                document.getElementById('standaloneXrayBOTH').value = item.xrayPricing.both || '';
+            }
+            
+            if (item.oxygenPricing) {
+                document.getElementById('standaloneO2Price').value = item.oxygenPricing.price || '';
+            }
+            
+            if (item.isoPricing) {
+                document.getElementById('standaloneISOPrice').value = item.isoPricing.price || '';
+            }
+            
+            // Update UI for edit mode
+            document.getElementById('formTitle').innerHTML = 
+                `<i class="fas fa-edit me-2"></i>Edit Item: ${item.name}`;
+            document.getElementById('addItemBtn').innerHTML = 
+                '<i class="fas fa-save me-2"></i>Update Item';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            
+            showToast(`Editing: ${item.name}`, 'info');
+        }
+
+        function deleteStandaloneItem(itemId) {
+            const item = standaloneItems[currentCategory]?.find(i => i.id == itemId);
+            if (!item) {
+                showToast('Item not found', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete "${item.name}"?`)) {
+                return;
+            }
+            
+            const index = standaloneItems[currentCategory].findIndex(i => i.id == itemId);
+            if (index > -1) {
+                standaloneItems[currentCategory].splice(index, 1);
+                
+                // Remove category if empty
+                if (standaloneItems[currentCategory].length === 0) {
+                    delete standaloneItems[currentCategory];
+                }
+                
+                saveStandaloneData();
+                loadStandaloneCategoryItems(currentCategory);
+                updateStandaloneStats();
+                showToast(`${item.name} deleted successfully`, 'success');
             }
         }
-    </script>
-</body>
-</html>
 
+        function cancelEditStandalone() {
+            editingItemId = null;
+            document.getElementById('formTitle').innerHTML = 
+                `<i class="fas fa-plus-circle me-2"></i>Add New Item to ${currentCategory}`;
+            document.getElementById('addItemBtn').innerHTML = 
+                '<i class="fas fa-plus me-2"></i>Add Item';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            resetStandaloneForm();
+        }
 
-    <script>
-        // Theme Toggle Functionality
+        function resetStandaloneForm() {
+            document.getElementById('standaloneItemName').value = '';
+            document.getElementById('standaloneItemPrice').value = '';
+            document.getElementById('standaloneItemType').value = '';
+            document.getElementById('standaloneItemQuantity').value = '';
+            document.getElementById('standaloneItemStrength').value = '';
+            document.getElementById('standaloneItemDescription').value = '';
+            document.getElementById('standaloneXrayAP').value = '';
+            document.getElementById('standaloneXrayLAT').value = '';
+            document.getElementById('standaloneXrayOBLIQUE').value = '';
+            document.getElementById('standaloneXrayBOTH').value = '';
+            document.getElementById('standaloneO2Price').value = '';
+            document.getElementById('standaloneISOPrice').value = '';
+        }
+
+        function saveStandaloneData() {
+            try {
+                localStorage.setItem('standaloneHospitalItems', JSON.stringify(standaloneItems));
+            } catch (e) {
+                showToast('Error saving data: ' + e.message, 'error');
+            }
+        }
+
+        function updateStandaloneStats() {
+            let totalItems = 0;
+            let categories = Object.keys(standaloneItems).length;
+            let lastAdded = '--';
+            
+            // Calculate total items and find last added
+            let latestDate = 0;
+            for (const category in standaloneItems) {
+                totalItems += standaloneItems[category].length;
+                standaloneItems[category].forEach(item => {
+                    const itemDate = new Date(item.dateAdded).getTime();
+                    if (itemDate > latestDate) {
+                        latestDate = itemDate;
+                        lastAdded = new Date(itemDate).toLocaleDateString();
+                    }
+                });
+            }
+            
+            document.getElementById('totalItemsStats').textContent = totalItems;
+            document.getElementById('categoriesStats').textContent = categories;
+            document.getElementById('lastAddedStats').textContent = lastAdded;
+        }
+
+        function generateSampleData() {
+            if (!confirm('This will add sample data to your standalone system. Continue?')) {
+                return;
+            }
+            
+            const sampleData = {
+                'Lab': [
+                    { id: Date.now() + 1, name: 'CBC', type: 'Blood Test', price: 450, description: 'Complete Blood Count', dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'Lab' },
+                    { id: Date.now() + 2, name: 'Blood Sugar', type: 'Blood Test', price: 120, description: 'Glucose Level Test', dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'Lab' }
+                ],
+                'Medicine': [
+                    { id: Date.now() + 3, name: 'Paracetamol', type: 'Tablet', strength: '500mg', quantity: '10 pcs', price: 25, dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'Medicine' },
+                    { id: Date.now() + 4, name: 'Amoxicillin', type: 'Capsule', strength: '250mg', quantity: '21 pcs', price: 180, dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'Medicine' }
+                ],
+                'X-ray': [
+                    { id: Date.now() + 5, name: 'Chest X-ray', type: 'Diagnostic', price: 800, xrayPricing: { ap: 800, lat: 900, oblique: 850, both: 1500 }, dateAdded: new Date().toISOString(), lastModified: new Date().toISOString(), category: 'X-ray' }
+                ]
+            };
+            
+            // Merge with existing data
+            for (const category in sampleData) {
+                if (!standaloneItems[category]) {
+                    standaloneItems[category] = [];
+                }
+                standaloneItems[category].push(...sampleData[category]);
+            }
+            
+            saveStandaloneData();
+            updateStandaloneStats();
+            
+            if (currentCategory && sampleData[currentCategory]) {
+                loadStandaloneCategoryItems(currentCategory);
+            }
+            
+            showToast('Sample data generated successfully!', 'success');
+        }
+
+        function exportStandaloneItems() {
+            if (Object.keys(standaloneItems).length === 0) {
+                showToast('No items to export', 'warning');
+                return;
+            }
+            
+            const exportData = {
+                items: standaloneItems,
+                metadata: {
+                    exportDate: new Date().toISOString(),
+                    version: '1.0',
+                    type: 'standalone_hospital_items',
+                    totalItems: Object.values(standaloneItems).reduce((sum, items) => sum + items.length, 0),
+                    categories: Object.keys(standaloneItems).length
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `standalone_hospital_items_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('Items exported successfully!', 'success');
+        }
+
+        function importStandaloneItems() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    
+                    if (importData.items) {
+                        // Merge imported data
+                        for (const category in importData.items) {
+                            if (!standaloneItems[category]) {
+                                standaloneItems[category] = [];
+                            }
+                            standaloneItems[category].push(...importData.items[category]);
+                        }
+                        
+                        saveStandaloneData();
+                        updateStandaloneStats();
+                        
+                        if (currentCategory && importData.items[currentCategory]) {
+                            loadStandaloneCategoryItems(currentCategory);
+                        }
+                        
+                        showToast('Items imported successfully!', 'success');
+                    } else {
+                        showToast('Invalid file format', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error importing file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function clearAllStandaloneItems() {
+            if (!confirm('Are you sure you want to clear ALL items? This action cannot be undone!')) {
+                return;
+            }
+            
+            standaloneItems = {};
+            currentCategory = '';
+            
+            // Hide sections
+            document.getElementById('itemFormSection').style.display = 'none';
+            document.getElementById('itemsDisplaySection').style.display = 'none';
+            document.getElementById('selectedCategoryCounter').textContent = 'None Selected';
+            
+            // Clear active states
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            saveStandaloneData();
+            updateStandaloneStats();
+            showToast('All items cleared!', 'info');
+        }
+
+        function clearCategoryItems() {
+            if (!currentCategory) return;
+            
+            if (!confirm(`Are you sure you want to clear all items from ${currentCategory}?`)) {
+                return;
+            }
+            
+            delete standaloneItems[currentCategory];
+            saveStandaloneData();
+            loadStandaloneCategoryItems(currentCategory);
+            updateStandaloneStats();
+            showToast(`${currentCategory} items cleared!`, 'info');
+        }
+
+        function exportCategoryItems() {
+            if (!currentCategory || !standaloneItems[currentCategory]) {
+                showToast('No items in current category to export', 'warning');
+                return;
+            }
+            
+            const exportData = {
+                category: currentCategory,
+                items: standaloneItems[currentCategory],
+                metadata: {
+                    exportDate: new Date().toISOString(),
+                    itemCount: standaloneItems[currentCategory].length
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentCategory.replace(/[^a-zA-Z0-9]/g, '_')}_items_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showToast(`${currentCategory} items exported!`, 'success');
+        }
+
+        function exportAllStandaloneData() {
+            exportStandaloneItems();
+        }
+
+        function viewStandaloneStats() {
+            let statsText = 'Standalone System Statistics:\n\n';
+            
+            let totalItems = 0;
+            for (const category in standaloneItems) {
+                const count = standaloneItems[category].length;
+                totalItems += count;
+                statsText += `${category}: ${count} items\n`;
+            }
+            
+            statsText += `\nTotal Items: ${totalItems}`;
+            statsText += `\nTotal Categories: ${Object.keys(standaloneItems).length}`;
+            statsText += `\nSession Duration: ${document.getElementById('sessionTimeStats').textContent}`;
+            
+            alert(statsText);
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.querySelector('.toast-container').appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Theme toggle function
         function toggleTheme() {
             const body = document.body;
             const themeIcon = document.getElementById('themeIcon');
@@ -577,10 +1028,8 @@
             const currentTheme = body.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
-            // Update theme
             body.setAttribute('data-theme', newTheme);
 
-            // Update toggle button
             if (newTheme === 'light') {
                 themeIcon.className = 'theme-toggle-icon fas fa-sun';
                 themeText.textContent = 'Light';
@@ -593,16 +1042,11 @@
                 themeToggle.classList.add('dark-mode');
             }
 
-            // Save preference
             localStorage.setItem('hospital-theme', newTheme);
-
-            // Show toast if function exists
-            if (typeof showToast === 'function') {
-                showToast(`Switched to ${newTheme} mode`, 'success');
-            }
+            showToast(`Switched to ${newTheme} mode`, 'success');
         }
 
-        // Initialize theme on page load
+        // Initialize theme
         function initializeTheme() {
             const savedTheme = localStorage.getItem('hospital-theme') || 'dark';
             const body = document.body;
@@ -626,3 +1070,5 @@
         // Initialize theme when DOM loads
         document.addEventListener('DOMContentLoaded', initializeTheme);
     </script>
+</body>
+</html>
