@@ -1839,7 +1839,163 @@ function updateISOEndTimeDisplay() {
     }
 }
 
+// Limb and Brace Input - Manual Entry Only
+async function showLimbAndBraceInput() {
+    const dynamicInputs = document.getElementById('dynamicInputs');
+
+    try {
+        dynamicInputs.innerHTML = `
+            <div class="limb-brace-container">
+                <div class="alert alert-info mb-3" style="background: rgba(255, 153, 118, 0.1); border: 1px solid rgba(255, 153, 118, 0.3); color: white;">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Limb & Brace Equipment - Manual Entry Only</strong>
+                    <div class="mt-1 small">Enter custom limb and brace equipment details manually</div>
+                </div>
+
+                <div class="manual-entry-section">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Equipment Name</label>
+                            <input type="text" class="form-control" id="limbBraceName" 
+                                   placeholder="e.g., Knee Brace, Arm Support, etc." 
+                                   oninput="updateLimbBraceButton()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="limbBraceQuantity" 
+                                   value="1" min="1" oninput="updateLimbBraceButton()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price</label>
+                            <input type="number" class="form-control" id="limbBracePrice" 
+                                   placeholder="0.00" min="0" step="0.01" oninput="updateLimbBraceButton()">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label">Type/Model</label>
+                            <input type="text" class="form-control" id="limbBraceType" 
+                                   placeholder="Optional: Model or type specification">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Size/Specifications</label>
+                            <input type="text" class="form-control" id="limbBraceSize" 
+                                   placeholder="Optional: Size, measurements, etc.">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-12">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="limbBraceNotes" rows="2" 
+                                      placeholder="Optional: Additional specifications, fitting notes, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary" id="addLimbBraceBtn" 
+                                onclick="addLimbBraceToCart()" style="display: none;" disabled>
+                            <i class="fas fa-plus-circle me-1"></i>Add to Bill
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        console.log('Limb & Brace manual entry interface loaded');
+        
+    } catch (error) {
+        console.error('Error loading Limb & Brace interface:', error);
+        showToast('Error loading Limb & Brace interface', 'danger');
+        dynamicInputs.innerHTML = '<div class="alert alert-danger">Failed to load Limb & Brace interface</div>';
+    }
+}
+
+function updateLimbBraceButton() {
+    const name = document.getElementById('limbBraceName')?.value.trim();
+    const quantity = document.getElementById('limbBraceQuantity')?.value;
+    const price = document.getElementById('limbBracePrice')?.value;
+    const addButton = document.getElementById('addLimbBraceBtn');
+    
+    if (addButton) {
+        if (name && quantity && price && parseFloat(price) > 0) {
+            addButton.style.display = 'block';
+            addButton.disabled = false;
+        } else {
+            addButton.style.display = 'none';
+            addButton.disabled = true;
+        }
+    }
+}
+
+function addLimbBraceToCart() {
+    const name = document.getElementById('limbBraceName')?.value.trim();
+    const quantity = parseInt(document.getElementById('limbBraceQuantity')?.value) || 1;
+    const price = parseFloat(document.getElementById('limbBracePrice')?.value) || 0;
+    const type = document.getElementById('limbBraceType')?.value.trim();
+    const size = document.getElementById('limbBraceSize')?.value.trim();
+    const notes = document.getElementById('limbBraceNotes')?.value.trim();
+    
+    if (!name || price <= 0) {
+        showToast('Please enter equipment name and valid price', 'warning');
+        return;
+    }
+    
+    // Create strength field from type and size
+    let strength = '';
+    if (type && size) {
+        strength = `${type} - ${size}`;
+    } else if (type) {
+        strength = type;
+    } else if (size) {
+        strength = size;
+    }
+    
+    const limbBraceItem = {
+        id: Date.now() + Math.random(),
+        category: 'Limb and Brace',
+        name: name,
+        type: type || 'Equipment',
+        strength: strength,
+        quantity: quantity,
+        price: price,
+        totalPrice: price * quantity,
+        description: notes || `Custom limb & brace equipment: ${name}`
+    };
+    
+    addItemToBill(limbBraceItem);
+    showToast(`${name} added to bill - ৳${(price * quantity).toFixed(2)}`, 'success');
+    
+    // Clear form
+    resetLimbBraceForm();
+}
+
+function resetLimbBraceForm() {
+    const fields = ['limbBraceName', 'limbBraceQuantity', 'limbBracePrice', 'limbBraceType', 'limbBraceSize', 'limbBraceNotes'];
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            if (fieldId === 'limbBraceQuantity') {
+                field.value = '1';
+            } else {
+                field.value = '';
+            }
+        }
+    });
+    
+    const addButton = document.getElementById('addLimbBraceBtn');
+    if (addButton) {
+        addButton.style.display = 'none';
+        addButton.disabled = true;
+    }
+}
+
 // Make functions globally available
+window.showLimbAndBraceInput = showLimbAndBraceInput;
+window.updateLimbBraceButton = updateLimbBraceButton;
+window.addLimbBraceToCart = addLimbBraceToCart;
+window.resetLimbBraceForm = resetLimbBraceForm;
 window.handleO2ManualDateEntry = handleO2ManualDateEntry;
 window.handleO2ManualTimeEntry = handleO2ManualTimeEntry;
 window.toggleO2DatePicker = toggleO2DatePicker;
