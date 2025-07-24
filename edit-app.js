@@ -181,6 +181,15 @@ const defaultCategories = {
         system: true,
         readonly: true,
         group: 'medical'
+    },
+    'Limb and Brace': {
+        icon: 'fas fa-hand-paper',
+        color: '#ff9776',
+        type: 'standard',
+        subcategories: {},
+        system: true,
+        readonly: true,
+        group: 'medical'
     }
 };
 
@@ -320,10 +329,10 @@ async function checkAndSetupDefaultO2ISO(allItems) {
     try {
         // Check if O2, ISO category has any items
         const o2ISOItems = allItems.filter(item => item.category === 'O2, ISO');
-        
+
         if (o2ISOItems.length === 0) {
             console.log('No O2, ISO entries found. Setting up default pricing...');
-            
+
             // Create default O2 item: 2L/hour at ৳130
             const defaultO2Item = {
                 category: 'O2, ISO',
@@ -656,6 +665,7 @@ function populateCategorySelects() {
     populateItemCategoryGrid();
 }
 
+// Populate item category selection grid
 function populateItemCategoryGrid() {
     const gridContainer = document.getElementById('itemCategoryGrid');
     if (!gridContainer) return;
@@ -907,7 +917,7 @@ function generateDynamicItemFields(categoryPath) {
                         </label>
                         <select class="form-select" id="oxygenUnit" required>
                             <option value="">Select O2 unit...</option>
-                            <option value="45min">45 minutes (1 hour equivalent)</option>
+                            <option value="45min">45 minutes (1 hour equivalent)</option>```text
                             <option value="liter">Per Liter</option>
                         </select>
                     </div>
@@ -1686,6 +1696,7 @@ async function updateItem(itemId) {
 
         // Reload items and reset form
         await loadCategoryItems(currentEditCategory);
+        ```text
         resetFormToAddMode();
 
     } catch (error) {
@@ -2606,8 +2617,7 @@ function showO2ISOModal() {
     const isoBaseRateInput = document.getElementById('isoBaseRate');
 
     if (o2BaseHourInput && !o2BaseHourInput.value) o2BaseHourInput.value = '1';
-    if (o2BaseRateInput && !o2BaseRateInput.value) o2BaseRateInput.value = '130';
-    if (isoBaseHourInput && !isoBaseHourInput.value) isoBaseHourInput.value = '0.0167'; // 1 minute in hours
+    if (o2BaseRateInput && !o2BaseRateInput.value) o2BaseRateInput.value = '130';    if (isoBaseHourInput && !isoBaseHourInput.value) isoBaseHourInput.value = '0.0167'; // 1 minute in hours
     if (isoBaseRateInput && !isoBaseRateInput.value) isoBaseRateInput.value = '30';
 
     const modal = new bootstrap.Modal(document.getElementById('o2ISOModal'));
