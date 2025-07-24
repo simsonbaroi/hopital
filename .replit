@@ -1,4 +1,4 @@
-modules = ["nodejs-16", "web"]
+modules = ["nodejs-16", "python-3.11", "web"]
 run = "npm run dev"
 
 [nix]
@@ -11,7 +11,7 @@ deploymentTarget = "static"
 run = ["sh", "-c", "npm run dev"]
 
 [workflows]
-runButton = "Hospital Billing Server"
+runButton = "Hospital Billing Flask Server"
 
 [[workflows.workflow]]
 name = "Serve static"
@@ -34,6 +34,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node server.js"
+
+[[workflows.workflow]]
+name = "Hospital Billing Flask Server"
+author = 45464779
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
 
 [[ports]]
 localPort = 80
