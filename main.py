@@ -35,13 +35,15 @@ else:
 app.static_folder = '.'
 app.template_folder = '.'
 
-@app.before_first_request
 def startup_info():
     """Log startup information"""
     logger.info("🏥 Hospital Billing System Flask Server Starting")
     db_info = db.get_connection_info()
     logger.info(f"📊 Database: {db_info['database']} on {db_info['host']}:{db_info['port']}")
     logger.info(f"🔗 Connected: {db_info['connected']}")
+
+# Call startup info immediately
+startup_info()
 
 @app.route('/')
 def index():

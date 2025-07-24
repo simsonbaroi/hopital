@@ -1,4 +1,11 @@
-// Advanced Edit App JavaScript - Hierarchical Category Management and Dynamic Pricing
+// Advanced Edit Application for Hospital Billing System  
+// Version: 3.0 - Professional Edition with System Categories
+//
+// 🚨 CRITICAL ARCHITECTURE PRINCIPLE:
+// ALL CATEGORIES, UI DESIGN, AND EDIT FUNCTIONALITY MUST REMAIN IN THE SYSTEM (FRONTEND)
+// NEVER STORE UI STRUCTURE OR CATEGORIES IN THE DATABASE
+// The database is for DATA ONLY - items, bills, settings
+// The system structure is CODE-BASED and should never be database-driven
 
 // Global variables for advanced edit mode
 let currentEditCategory = '';
@@ -2602,7 +2609,7 @@ function showO2ISOModal() {
     const isoBaseRateInput = document.getElementById('isoBaseRate');
 
     if (o2BaseHourInput && !o2BaseHourInput.value) o2BaseHourInput.value = '1';
-    if (o2BaseRateInput && !o2BaseRateInput.value) o2BaseRateInput.value = '130';    if (isoBaseHourInput && !isoBaseHourInput.value) isoBaseHourInput.value = '0.0167'; // 1 minute in hours
+    if (o2BaseRateInput && const o2BaseRateInput && !o2BaseRateInput.value) o2BaseRateInput.value = '130';    if (isoBaseHourInput && !isoBaseHourInput.value) isoBaseHourInput.value = '0.0167'; // 1 minute in hours
     if (isoBaseRateInput && !isoBaseRateInput.value) isoBaseRateInput.value = '30';
 
     const modal = new bootstrap.Modal(document.getElementById('o2ISOModal'));
