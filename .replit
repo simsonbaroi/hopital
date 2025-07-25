@@ -1,14 +1,14 @@
-modules = ["nodejs-16", "python-3.11", "web"]
+modules = ["nodejs-16", "web", "python-3.12"]
 run = "npm run dev"
 
 [nix]
 channel = "stable-25_05"
-packages = ["static-web-server"]
+packages = ["openssl", "postgresql", "static-web-server"]
 
 [deployment]
 publicDir = "/"
 deploymentTarget = "static"
-run = ["sh", "-c", "python main.py"]
+run = ["sh", "-c", "npm run dev"]
 
 [workflows]
 runButton = "Hospital Billing Flask Server"

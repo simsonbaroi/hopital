@@ -16,3 +16,12 @@ gunicorn==21.2.0
 
 # Development tools (optional)
 flask-migrate==4.0.5
+flask
+flask-cors
+flask-migrate
+Flask-SQLAlchemy
+gunicorn
+mysql-connector-python
+psycopg2-binary
+python-dotenv
+SQLAlchemy

@@ -1,0 +1,133 @@
+--> pip install gunicorn flask-cors Flask-SQLAlchemy flask-migrate mysql-connector-python flask psycopg2-binary SQLAlchemy python-dotenv
+Collecting gunicorn
+  Downloading gunicorn-23.0.0-py3-none-any.whl.metadata (4.4 kB)
+Collecting flask-cors
+  Downloading flask_cors-6.0.1-py3-none-any.whl.metadata (5.3 kB)
+Collecting Flask-SQLAlchemy
+  Downloading flask_sqlalchemy-3.1.1-py3-none-any.whl.metadata (3.4 kB)
+Collecting flask-migrate
+  Downloading Flask_Migrate-4.1.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting mysql-connector-python
+  Downloading mysql_connector_python-9.4.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (7.5 kB)
+Collecting flask
+  Downloading flask-3.1.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting psycopg2-binary
+  Downloading psycopg2_binary-2.9.10-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Collecting SQLAlchemy
+  Downloading sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+Collecting python-dotenv
+  Downloading python_dotenv-1.1.1-py3-none-any.whl.metadata (24 kB)
+Collecting packaging (from gunicorn)
+  Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting Werkzeug>=0.7 (from flask-cors)
+  Downloading werkzeug-3.1.3-py3-none-any.whl.metadata (3.7 kB)
+Collecting alembic>=1.9.0 (from flask-migrate)
+  Downloading alembic-1.16.4-py3-none-any.whl.metadata (7.3 kB)
+Collecting blinker>=1.9.0 (from flask)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting click>=8.1.3 (from flask)
+  Downloading click-8.2.1-py3-none-any.whl.metadata (2.5 kB)
+Collecting itsdangerous>=2.2.0 (from flask)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting jinja2>=3.1.2 (from flask)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting markupsafe>=2.1.1 (from flask)
+  Downloading MarkupSafe-3.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
+Collecting greenlet>=1 (from SQLAlchemy)
+  Downloading greenlet-3.2.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (4.1 kB)
+Collecting typing-extensions>=4.6.0 (from SQLAlchemy)
+  Downloading typing_extensions-4.14.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting Mako (from alembic>=1.9.0->flask-migrate)
+  Downloading mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+Downloading gunicorn-23.0.0-py3-none-any.whl (85 kB)
+Downloading flask_cors-6.0.1-py3-none-any.whl (13 kB)
+Downloading flask_sqlalchemy-3.1.1-py3-none-any.whl (25 kB)
+Downloading Flask_Migrate-4.1.0-py3-none-any.whl (21 kB)
+Downloading mysql_connector_python-9.4.0-cp312-cp312-manylinux_2_28_x86_64.whl (33.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 33.9/33.9 MB 69.4 MB/s eta 0:00:00
+Downloading flask-3.1.1-py3-none-any.whl (103 kB)
+Downloading psycopg2_binary-2.9.10-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.0/3.0 MB 121.5 MB/s eta 0:00:00
+Downloading sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 67.8 MB/s eta 0:00:00
+Downloading python_dotenv-1.1.1-py3-none-any.whl (20 kB)
+Downloading alembic-1.16.4-py3-none-any.whl (247 kB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading click-8.2.1-py3-none-any.whl (102 kB)
+Downloading greenlet-3.2.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (605 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 605.5/605.5 kB 24.6 MB/s eta 0:00:00
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading MarkupSafe-3.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (23 kB)
+Downloading typing_extensions-4.14.1-py3-none-any.whl (43 kB)
+Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+Downloading packaging-25.0-py3-none-any.whl (66 kB)
+Downloading mako-1.3.10-py3-none-any.whl (78 kB)
+Installing collected packages: typing-extensions, python-dotenv, psycopg2-binary, packaging, mysql-connector-python, markupsafe, itsdangerous, greenlet, click, blinker, Werkzeug, SQLAlchemy, Mako, jinja2, gunicorn, flask, alembic, Flask-SQLAlchemy, flask-cors, flask-migrate
+Successfully installed Flask-SQLAlchemy-3.1.1 Mako-1.3.10 SQLAlchemy-2.0.41 Werkzeug-3.1.3 alembic-1.16.4 blinker-1.9.0 click-8.2.1 flask-3.1.1 flask-cors-6.0.1 flask-migrate-4.1.0 greenlet-3.2.3 gunicorn-23.0.0 itsdangerous-2.2.0 jinja2-3.1.6 markupsafe-3.0.2 mysql-connector-python-9.4.0 packaging-25.0 psycopg2-binary-2.9.10 python-dotenv-1.1.1 typing-extensions-4.14.1
+--> pip freeze
+--> pip install -r requirements.txt
+Collecting flask==2.3.3 (from -r requirements.txt (line 2))
+  Downloading flask-2.3.3-py3-none-any.whl.metadata (3.6 kB)
+Collecting flask-cors==4.0.0 (from -r requirements.txt (line 3))
+  Downloading Flask_Cors-4.0.0-py2.py3-none-any.whl.metadata (5.4 kB)
+Collecting psycopg2-binary==2.9.9 (from -r requirements.txt (line 6))
+  Downloading psycopg2_binary-2.9.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.4 kB)
+Collecting SQLAlchemy==2.0.21 (from -r requirements.txt (line 7))
+  Downloading SQLAlchemy-2.0.21-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.4 kB)
+Collecting Flask-SQLAlchemy==3.0.5 (from -r requirements.txt (line 8))
+  Downloading flask_sqlalchemy-3.0.5-py3-none-any.whl.metadata (3.3 kB)
+Collecting psycopg2==2.9.9 (from -r requirements.txt (line 9))
+  Downloading psycopg2-2.9.9.tar.gz (384 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... error
+  error: subprocess-exited-with-error
+  
+  × Getting requirements to build wheel did not run successfully.
+  │ exit code: 1
+  ╰─> [34 lines of output]
+      /tmp/pip-build-env-n5pzb5z_/overlay/lib/python3.12/site-packages/setuptools/dist.py:759: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+      
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+      
+              License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+      
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+      
+      !!
+        self._finalize_license_expression()
+      running egg_info
+      writing psycopg2.egg-info/PKG-INFO
+      writing dependency_links to psycopg2.egg-info/dependency_links.txt
+      writing top-level names to psycopg2.egg-info/top_level.txt
+      
+      Error: pg_config executable not found.
+      
+      pg_config is required to build psycopg2 from source.  Please add the directory
+      containing pg_config to the $PATH or specify the full executable path with the
+      option:
+      
+          python setup.py build_ext --pg-config /path/to/pg_config build ...
+      
+      or with the pg_config option in 'setup.cfg'.
+      
+      If you prefer to avoid building psycopg2 from source, please install the PyPI
+      'psycopg2-binary' package instead.
+      
+      For further information please check the 'doc/src/install.rst' file (also at
+      <https://www.psycopg.org/docs/install.html>).
+      
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: subprocess-exited-with-error
+
+× Getting requirements to build wheel did not run successfully.
+│ exit code: 1
+╰─> See above for output.
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+exit status 1
