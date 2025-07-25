@@ -13,18 +13,45 @@ class FlaskDatabaseAPI {
     }
 
     /**
+     * Make HTTP request with error handling
+     */
+    async makeRequest(endpoint, options = {}) {
+        const url = `${this.baseUrl}${endpoint}`;
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+        
+        const finalOptions = { ...defaultOptions, ...options };
+        
+        try {
+            const response = await fetch(url, finalOptions);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`API request failed: ${endpoint}`, error);
+            throw error;
+        }
+    }
+
+    /**
      * Initialize the API connection
      */
     async init() {
         try {
             const response = await this.makeRequest('/api/status');
-            console.log('✅ Professional Flask-MySQL API initialized:', response.message);
-            console.log('📊 Database:', response.connection_info.database, 'on', 
-                       response.connection_info.host + ':' + response.connection_info.port);
+            console.log('✅ Professional Flask-SQLite API initialized:', response.message);
+            console.log('📊 Database:', response.database || 'SQLite');
             this.initialized = true;
             return true;
         } catch (error) {
-            console.error('❌ Failed to initialize Flask-MySQL API:', error);
+            console.error('❌ Failed to initialize Flask API:', error);
             return this.initFallback();
         }
     }
@@ -43,6 +70,182 @@ class FlaskDatabaseAPI {
         }
         console.error('❌ No fallback database available');
         return false;
+    }
+
+    /**
+     * Get all items
+     */
+    async getAllItems() {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.getAllItems();
+        }
+
+        try {
+            const response = await this.makeRequest('/api/items');
+            return response.items || [];
+        } catch (error) {
+            console.error('Error getting all items:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get items by category
+     */
+    async getItemsByCategory(category) {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.getItemsByCategory(category);
+        }
+
+        try {
+            const response = await this.makeRequest(`/api/items/category/${encodeURIComponent(category)}`);
+            return response.items || [];
+        } catch (error) {
+            console.error(`Error getting items for category ${category}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Add new item
+     */
+    async addItem(itemData) {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.addItem(itemData);
+        }
+
+        try {
+            const response = await this.makeRequest('/api/items', {
+                method: 'POST',
+                body: JSON.stringify(itemData)
+            });
+            return response.item_id;
+        } catch (error) {
+            console.error('Error adding item:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update existing item
+     */
+    async updateItem(itemId, itemData) {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.updateItem(itemId, itemData);
+        }
+
+        try {
+            const response = await this.makeRequest(`/api/items/${itemId}`, {
+                method: 'PUT',
+                body: JSON.stringify(itemData)
+            });
+            return response.success;
+        } catch (error) {
+            console.error('Error updating item:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete item
+     */
+    async deleteItem(itemId) {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.deleteItem(itemId);
+        }
+
+        try {
+            const response = await this.makeRequest(`/api/items/${itemId}`, {
+                method: 'DELETE'
+            });
+            return response.success;
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Save bill
+     */
+    async saveBill(billData) {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.saveBill(billData);
+        }
+
+        try {
+            const response = await this.makeRequest('/api/bills', {
+                method: 'POST',
+                body: JSON.stringify(billData)
+            });
+            return response.bill_id;
+        } catch (error) {
+            console.error('Error saving bill:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get database statistics
+     */
+    async getStatistics() {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        if (this.localDB) {
+            return await this.localDB.getStatistics();
+        }
+
+        try {
+            const response = await this.makeRequest('/api/statistics');
+            return response.statistics || {};
+        } catch (error) {
+            console.error('Error getting statistics:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get database info
+     */
+    async getDatabaseInfo() {
+        if (!this.initialized) {
+            throw new Error('API not initialized');
+        }
+
+        try {
+            const response = await this.makeRequest('/api/database/info');
+            return response.database_info || {};
+        } catch (error) {
+            console.error('Error getting database info:', error);
+            return { connected: false, database_type: 'Unknown' };
+        }
+    }n false;
     }
 
     /**
