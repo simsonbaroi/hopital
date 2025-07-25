@@ -553,28 +553,74 @@
                             </div>
                         </div>
 
-                        <!-- Room Type Selection -->
+                        <!-- Enhanced Room Type Selection -->
                         <div class="room-type-section">
-                            <h5 style="color: var(--secondary); margin-bottom: 15px;">Room Type</h5>
+                            <div class="section-header-enhanced">
+                                <h5><i class="fas fa-bed me-2"></i>Room Type Selection</h5>
+                                <div class="header-badge">Choose your accommodation</div>
+                            </div>
 
-                            <div class="room-type-checkboxes">
-                                <div class="room-checkbox">
-                                    <input type="checkbox" id="generalRoom" onchange="handleRoomTypeChange('general')">
-                                    <label for="generalRoom">General Bed</label>
+                            <!-- Room Type Cards -->
+                            <div class="room-type-cards">
+                                <div class="room-card" id="generalRoomCard">
+                                    <div class="room-card-icon">
+                                        <i class="fas fa-bed"></i>
+                                    </div>
+                                    <div class="room-card-content">
+                                        <h6>General Bed</h6>
+                                        <p>Shared accommodation with basic amenities</p>
+                                        <div class="room-pricing">
+                                            <span class="price-label">Admission:</span>
+                                            <span class="price-amount">৳200</span>
+                                        </div>
+                                        <div class="room-pricing">
+                                            <span class="price-label">Per Day:</span>
+                                            <span class="price-amount">৳100</span>
+                                        </div>
+                                    </div>
+                                    <div class="room-card-selector">
+                                        <input type="checkbox" id="generalRoom" onchange="handleRoomTypeChange('general')" class="room-checkbox-input">
+                                        <label for="generalRoom" class="room-checkbox-label">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="room-checkbox">
-                                    <input type="checkbox" id="privateRoom" onchange="handleRoomTypeChange('private')">
-                                    <label for="privateRoom">Private</label>
+
+                                <div class="room-card" id="privateRoomCard">
+                                    <div class="room-card-icon">
+                                        <i class="fas fa-door-closed"></i>
+                                    </div>
+                                    <div class="room-card-content">
+                                        <h6>Private Room</h6>
+                                        <p>Individual room with enhanced privacy</p>
+                                        <div class="room-pricing">
+                                            <span class="price-label">Admission:</span>
+                                            <span class="price-amount">৳500</span>
+                                        </div>
+                                        <div class="room-pricing">
+                                            <span class="price-label">From:</span>
+                                            <span class="price-amount">৳300/day</span>
+                                        </div>
+                                    </div>
+                                    <div class="room-card-selector">
+                                        <input type="checkbox" id="privateRoom" onchange="handleRoomTypeChange('private')" class="room-checkbox-input">
+                                        <label for="privateRoom" class="room-checkbox-label">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Private Room Options -->
                             <div class="private-room-options" id="privateRoomOptions">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <h6 style="color: var(--secondary); margin: 0;">Select Private Room</h6>
-                                    <button type="button" onclick="reloadPrivateRooms()" 
-                                            style="background: rgba(0, 201, 167, 0.2); border: 1px solid rgba(0, 201, 167, 0.5); border-radius: 4px; padding: 4px 8px; color: var(--secondary); font-size: 12px; cursor: pointer;">
-                                        <i class="fas fa-sync-alt"></i> Refresh
+                                <div class="private-room-header">
+                                    <div class="private-room-title">
+                                        <i class="fas fa-list-ul me-2"></i>
+                                        <span>Select Private Room Type</span>
+                                    </div>
+                                    <button type="button" onclick="reloadPrivateRooms()" class="refresh-btn">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <span>Refresh</span>
                                     </button>
                                 </div>
                                 <div class="room-selection-grid" id="privateRoomGrid">
@@ -582,12 +628,31 @@
                                 </div>
                             </div>
 
-                            <!-- Visitation Section -->
+                            <!-- Enhanced Visitation Section -->
                             <div class="visitation-section">
-                                <h6 style="color: var(--secondary); margin-bottom: 15px;">Visitation</h6>
-                                <div class="visitation-input">
-                                    <label for="totalVisitations" style="color: white; font-weight: 500;">Total Visitations:</label>
-                                    <input type="number" id="totalVisitations" min="0" value="0" style="width: 100px;" onchange="updateBillPreview();">
+                                <div class="visitation-header">
+                                    <div class="visitation-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="visitation-title">
+                                        <h6>Visitor Management</h6>
+                                        <p>Track total visitations during stay</p>
+                                    </div>
+                                </div>
+                                <div class="visitation-counter">
+                                    <label for="totalVisitations">Total Visitations</label>
+                                    <div class="counter-controls">
+                                        <button type="button" onclick="adjustVisitations(-1)" class="counter-btn">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" id="totalVisitations" min="0" value="0" onchange="updateBillPreview();" readonly>
+                                        <button type="button" onclick="adjustVisitations(1)" class="counter-btn">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="visitation-cost">
+                                        <span id="visitationCostDisplay">৳0 (৳50 per visit)</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -920,32 +985,98 @@
             console.log(`Populated ${privateRooms.length} private room options`);
         }
 
-        // Handle room type change
+        // Handle room type change with enhanced UI
         function handleRoomTypeChange(type) {
             const generalCheckbox = document.getElementById('generalRoom');
             const privateCheckbox = document.getElementById('privateRoom');
+            const generalCard = document.getElementById('generalRoomCard');
+            const privateCard = document.getElementById('privateRoomCard');
             const privateOptions = document.getElementById('privateRoomOptions');
 
             if (type === 'general') {
                 if (generalCheckbox.checked) {
                     privateCheckbox.checked = false;
                     privateOptions.style.display = 'none';
+                    
+                    // Update card states
+                    generalCard.classList.add('selected');
+                    privateCard.classList.remove('selected');
+                    
                     // Clear private room selections
                     document.querySelectorAll('#privateRoomGrid input[type="checkbox"]').forEach(cb => {
                         cb.checked = false;
                     });
+                } else {
+                    generalCard.classList.remove('selected');
                 }
             } else if (type === 'private') {
                 if (privateCheckbox.checked) {
                     generalCheckbox.checked = false;
                     privateOptions.style.display = 'block';
+                    
+                    // Update card states
+                    privateCard.classList.add('selected');
+                    generalCard.classList.remove('selected');
                 } else {
                     privateOptions.style.display = 'none';
+                    privateCard.classList.remove('selected');
                 }
             }
 
             updateBillPreview();
+            updateVisitationDisplay();
         }
+
+        // Adjust visitation counter
+        function adjustVisitations(change) {
+            const input = document.getElementById('totalVisitations');
+            const currentValue = parseInt(input.value) || 0;
+            const newValue = Math.max(0, currentValue + change);
+            input.value = newValue;
+            updateBillPreview();
+            updateVisitationDisplay();
+        }
+
+        // Update visitation cost display
+        function updateVisitationDisplay() {
+            const visitations = parseInt(document.getElementById('totalVisitations')?.value) || 0;
+            const costDisplay = document.getElementById('visitationCostDisplay');
+            const cost = visitations * 50; // ৳50 per visit
+            
+            if (costDisplay) {
+                costDisplay.textContent = `৳${cost} (৳50 per visit)`;
+            }
+        }
+
+        // Enhanced room card click handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make room cards clickable
+            const generalCard = document.getElementById('generalRoomCard');
+            const privateCard = document.getElementById('privateRoomCard');
+            
+            if (generalCard) {
+                generalCard.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = document.getElementById('generalRoom');
+                        checkbox.checked = !checkbox.checked;
+                        handleRoomTypeChange('general');
+                    }
+                });
+            }
+            
+            if (privateCard) {
+                privateCard.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = document.getElementById('privateRoom');
+                        checkbox.checked = !checkbox.checked;
+                        handleRoomTypeChange('private');
+                    }
+                });
+            }
+            
+            // Initialize visitation display
+            updateVisitationDisplay();
+        });
 
         // Handle private room selection
         function handlePrivateRoomChange() {
