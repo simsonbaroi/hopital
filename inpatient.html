@@ -524,7 +524,7 @@
                         <!-- Admission and Discharge Dates -->
                         <div class="patient-form-grid">
                             <div class="form-group">
-                                <label for="admissionDate">Date Admitted (DD-MM-YYYY)</label>
+                                <label for="admissionDate">Date Admitted</label>
                                 <div class="date-input-container">
                                     <input type="date" id="admissionDate" onchange="calculateTotalDays(); updateBillPreview(); formatDateDisplay('admission');" style="display: none;">
                                     <input type="text" id="admissionDateDisplay" placeholder="DD-MM-YYYY" maxlength="10" onchange="handleManualDateEntry('admission')" onclick="toggleDatePicker('admission')" style="padding: 12px; border: 1px solid rgba(0, 201, 167, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 14px; width: 100%; cursor: pointer;">
@@ -534,7 +534,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="dischargeDate">Date Discharged (DD-MM-YYYY) - Leave empty for billing date</label>
+                                <label for="dischargeDate">Date Discharged</label>
                                 <div class="date-input-container">
                                     <input type="date" id="dischargeDate" onchange="calculateTotalDays(); updateBillPreview(); formatDateDisplay('discharge');" style="display: none;">
                                     <input type="text" id="dischargeDateDisplay" placeholder="DD-MM-YYYY or leave empty" maxlength="10" onchange="handleManualDateEntry('discharge')" onclick="toggleDatePicker('discharge')" style="padding: 12px; border: 1px solid rgba(0, 201, 167, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 14px; width: 100%; cursor: pointer;">
