@@ -6,7 +6,7 @@ import json
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
-from postgresql_database import db
+from flask_database import db
 
 # Load environment variables
 load_dotenv()
@@ -80,17 +80,8 @@ def health():
     """Health check endpoint"""
     db_info = db.get_connection_info()
     
-    # Determine overall health status
-    if db_info['connected']:
-        if db_info['database_type'] == 'PostgreSQL':
-            status = 'healthy'
-            message = 'System running with PostgreSQL'
-        else:
-            status = 'degraded'
-            message = 'System running with SQLite fallback - PostgreSQL unavailable'
-    else:
-        status = 'unhealthy'
-        message = 'Database connection failed'
+    status = 'healthy' if db_info['connected'] else 'unhealthy'
+    message = 'System running with SQLite database' if db_info['connected'] else 'Database connection failed'
     
     return jsonify({
         'status': status,
@@ -98,15 +89,9 @@ def health():
         'message': message,
         'database': {
             'connected': db_info['connected'],
-            'database_type': db_info['database_type'],
-            'postgresql_available': db_info['database_type'] == 'PostgreSQL',
-            'environment_configured': bool(os.getenv('DATABASE_URL'))
+            'database_type': db_info['database_type']
         },
-        'version': '3.0-postgresql',
-        'recommendations': {
-            'setup_postgresql': not bool(os.getenv('DATABASE_URL')),
-            'message': 'Create a PostgreSQL database in Replit Database tab' if not bool(os.getenv('DATABASE_URL')) else 'PostgreSQL configured'
-        }
+        'version': '3.0-sqlite'
     })
 
 @app.route('/api/status')
@@ -115,10 +100,10 @@ def api_status():
     db_info = db.get_connection_info()
     return jsonify({
         'server': 'online',
-        'database': 'mysql' if db_info['connected'] else 'offline',
-        'version': '3.0-postgresql-professional',
+        'database': 'sqlite' if db_info['connected'] else 'offline',
+        'version': '3.0-sqlite-professional',
         'timestamp': datetime.now().isoformat(),
-        'message': 'Professional Flask-PostgreSQL Hospital Billing System',
+        'message': 'Professional Flask-SQLite Hospital Billing System',
         'connection_info': {
             'database_type': db_info['database_type'],
             'connected': db_info['connected']
@@ -389,12 +374,6 @@ def get_database_info():
     try:
         db_info = db.get_connection_info()
         
-        # Add environment variable status
-        db_info['environment'] = {
-            'DATABASE_URL_set': bool(os.getenv('DATABASE_URL')),
-            'DATABASE_URL_length': len(os.getenv('DATABASE_URL', '')) if os.getenv('DATABASE_URL') else 0
-        }
-        
         return jsonify({
             'success': True,
             'database_info': db_info,
@@ -418,11 +397,7 @@ def test_database_connection():
         # Test query execution
         test_results = {
             'connection_status': db_info['connected'],
-            'database_type': db_info['database_type'],
-            'environment_check': {
-                'DATABASE_URL_exists': bool(os.getenv('DATABASE_URL')),
-                'DATABASE_URL_preview': os.getenv('DATABASE_URL', '')[:50] + '...' if os.getenv('DATABASE_URL') else None
-            }
+            'database_type': db_info['database_type']
         }
         
         if db_info['connected']:
@@ -478,7 +453,7 @@ def api_fallback(path):
     """Generic API endpoint fallback"""
     return jsonify({
         'error': 'API endpoint not implemented',
-        'message': 'This is a professional Flask-MySQL application.',
+        'message': 'This is a professional Flask-SQLite application.',
         'endpoint': f'/api/{path}',
         'available_endpoints': [
             'GET /api/items',
@@ -560,7 +535,7 @@ def static_files(filename):
         }), 404
 
 if __name__ == '__main__':
-    print('🏥 Professional Hospital Billing System - PostgreSQL Edition')
+    print('🏥 Professional Hospital Billing System - SQLite Edition')
     print('📍 Server running on: http://0.0.0.0:5000')
     print('🌐 Access URLs:')
     print('   - Main Portal (Landing): http://0.0.0.0:5000/')
@@ -569,8 +544,8 @@ if __name__ == '__main__':
     print('   - Price Editor: http://0.0.0.0:5000/edit')
     print('   - Health Check: http://0.0.0.0:5000/health')
     print('   - Database Info: http://0.0.0.0:5000/api/database/info')
-    print('⚡ Professional Flask-PostgreSQL server ready!')
-    print('💾 Using Replit PostgreSQL with SQLite fallback')
+    print('⚡ Professional Flask-SQLite server ready!')
+    print('💾 Using SQLite database')
     print('🔐 Professional error handling and logging enabled')
     print('🚀 Production-ready features active')
     

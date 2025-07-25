@@ -1,29 +1,29 @@
 
 import sqlite3
 import json
-import os
+import logging
 from datetime import datetime
-from contextlib import contextmanager
+from typing import List, Dict, Optional
 
-class FlaskHospitalDB:
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class HospitalDB:
     def __init__(self, db_path='hospital_billing_flask.db'):
         self.db_path = db_path
-        self.init_database()
+        self.connected = False
+        self._initialize_database()
     
-    @contextmanager
-    def get_db_connection(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
+    def _initialize_database(self):
+        """Initialize the SQLite database and create tables"""
         try:
-            yield conn
-        finally:
-            conn.close()
-    
-    def init_database(self):
-        """Initialize database with required tables"""
-        with self.get_db_connection() as conn:
-            # Items table
-            conn.execute('''
+            # Create database and tables
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Create items table
+            cursor.execute('''
                 CREATE TABLE IF NOT EXISTS items (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     category TEXT NOT NULL,
@@ -32,44 +32,55 @@ class FlaskHospitalDB:
                     strength TEXT,
                     price REAL NOT NULL,
                     description TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
             
-            # Bills table
-            conn.execute('''
+            # Create bills table
+            cursor.execute('''
                 CREATE TABLE IF NOT EXISTS bills (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     bill_number TEXT UNIQUE NOT NULL,
                     patient_name TEXT,
                     opd_number TEXT,
                     total_amount REAL NOT NULL,
-                    items_json TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    items_json TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
             
-            # Settings table
-            conn.execute('''
+            # Create settings table
+            cursor.execute('''
                 CREATE TABLE IF NOT EXISTS settings (
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
             
-            conn.commit()
+            # Create indexes for better performance
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_items_category ON items(category)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_bills_number ON bills(bill_number)')
             
-        # Initialize with sample data if empty
-        self.seed_sample_data()
+            conn.commit()
+            conn.close()
+            
+            self.connected = True
+            logger.info("✅ SQLite database initialized successfully")
+            
+            # Seed with sample data if needed
+            self._seed_sample_data()
+            
+        except Exception as e:
+            logger.error(f"❌ Database initialization failed: {e}")
+            self.connected = False
     
-    def seed_sample_data(self):
-        """Seed database with sample medical data"""
-        with self.get_db_connection() as conn:
+    def _seed_sample_data(self):
+        """Seed database with sample medical data if empty"""
+        try:
             # Check if data exists
-            result = conn.execute('SELECT COUNT(*) FROM items').fetchone()
-            if result[0] > 0:
+            if self.get_item_count() > 0:
                 return
             
             # Sample data for different categories
@@ -103,31 +114,93 @@ class FlaskHospitalDB:
                 {'category': 'O2, ISO', 'name': 'ISO Service', 'type': 'Isoflurane Therapy', 'strength': 'Per minute', 'price': 30, 'description': 'Isoflurane therapy per minute'},
             ]
             
-            for item in sample_items:
-                conn.execute('''
-                    INSERT INTO items (category, name, type, strength, price, description)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (item['category'], item['name'], item['type'], item['strength'], item['price'], item['description']))
+            for item_data in sample_items:
+                self.add_item(item_data)
             
-            conn.commit()
-            print(f"✅ Seeded database with {len(sample_items)} sample items")
+            logger.info(f"✅ Seeded database with {len(sample_items)} sample items")
+            
+        except Exception as e:
+            logger.error(f"Error seeding sample data: {e}")
     
-    def get_all_items(self):
+    def get_item_count(self) -> int:
+        """Get total number of items"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) FROM items')
+            count = cursor.fetchone()[0]
+            conn.close()
+            return count
+        except Exception as e:
+            logger.error(f"Error getting item count: {e}")
+            return 0
+    
+    def get_all_items(self) -> List[Dict]:
         """Get all items from database"""
-        with self.get_db_connection() as conn:
-            items = conn.execute('SELECT * FROM items ORDER BY category, name').fetchall()
-            return [dict(item) for item in items]
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id, category, name, type, strength, price, description, created_at, updated_at
+                FROM items ORDER BY category, name
+            ''')
+            
+            items = []
+            for row in cursor.fetchall():
+                items.append({
+                    'id': row[0],
+                    'category': row[1],
+                    'name': row[2],
+                    'type': row[3] or '',
+                    'strength': row[4] or '',
+                    'price': row[5],
+                    'description': row[6] or '',
+                    'created_at': row[7],
+                    'updated_at': row[8]
+                })
+            
+            conn.close()
+            return items
+        except Exception as e:
+            logger.error(f"Error getting all items: {e}")
+            raise
     
-    def get_items_by_category(self, category):
+    def get_items_by_category(self, category: str) -> List[Dict]:
         """Get items by category"""
-        with self.get_db_connection() as conn:
-            items = conn.execute('SELECT * FROM items WHERE category = ? ORDER BY name', (category,)).fetchall()
-            return [dict(item) for item in items]
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id, category, name, type, strength, price, description, created_at, updated_at
+                FROM items WHERE category = ? ORDER BY name
+            ''', (category,))
+            
+            items = []
+            for row in cursor.fetchall():
+                items.append({
+                    'id': row[0],
+                    'category': row[1],
+                    'name': row[2],
+                    'type': row[3] or '',
+                    'strength': row[4] or '',
+                    'price': row[5],
+                    'description': row[6] or '',
+                    'created_at': row[7],
+                    'updated_at': row[8]
+                })
+            
+            conn.close()
+            return items
+        except Exception as e:
+            logger.error(f"Error getting items by category: {e}")
+            raise
     
-    def add_item(self, item_data):
+    def add_item(self, item_data: Dict) -> int:
         """Add new item to database"""
-        with self.get_db_connection() as conn:
-            cursor = conn.execute('''
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
                 INSERT INTO items (category, name, type, strength, price, description)
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', (
@@ -138,13 +211,21 @@ class FlaskHospitalDB:
                 item_data['price'],
                 item_data.get('description', '')
             ))
+            
+            item_id = cursor.lastrowid
             conn.commit()
-            return cursor.lastrowid
+            conn.close()
+            return item_id
+        except Exception as e:
+            logger.error(f"Error adding item: {e}")
+            raise
     
-    def update_item(self, item_id, item_data):
+    def update_item(self, item_id: int, item_data: Dict) -> bool:
         """Update existing item"""
-        with self.get_db_connection() as conn:
-            conn.execute('''
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
                 UPDATE items 
                 SET category = ?, name = ?, type = ?, strength = ?, price = ?, description = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -157,18 +238,36 @@ class FlaskHospitalDB:
                 item_data.get('description', ''),
                 item_id
             ))
+            
+            success = cursor.rowcount > 0
             conn.commit()
+            conn.close()
+            return success
+        except Exception as e:
+            logger.error(f"Error updating item: {e}")
+            raise
     
-    def delete_item(self, item_id):
+    def delete_item(self, item_id: int) -> bool:
         """Delete item from database"""
-        with self.get_db_connection() as conn:
-            conn.execute('DELETE FROM items WHERE id = ?', (item_id,))
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM items WHERE id = ?', (item_id,))
+            
+            success = cursor.rowcount > 0
             conn.commit()
+            conn.close()
+            return success
+        except Exception as e:
+            logger.error(f"Error deleting item: {e}")
+            raise
     
-    def save_bill(self, bill_data):
+    def save_bill(self, bill_data: Dict) -> int:
         """Save bill to database"""
-        with self.get_db_connection() as conn:
-            conn.execute('''
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
                 INSERT INTO bills (bill_number, patient_name, opd_number, total_amount, items_json)
                 VALUES (?, ?, ?, ?, ?)
             ''', (
@@ -178,42 +277,80 @@ class FlaskHospitalDB:
                 bill_data['total_amount'],
                 json.dumps(bill_data['items'])
             ))
+            
+            bill_id = cursor.lastrowid
             conn.commit()
+            conn.close()
+            return bill_id
+        except Exception as e:
+            logger.error(f"Error saving bill: {e}")
+            raise
     
-    def get_bills(self, limit=50):
+    def get_bills(self, limit: int = 50) -> List[Dict]:
         """Get recent bills"""
-        with self.get_db_connection() as conn:
-            bills = conn.execute('SELECT * FROM bills ORDER BY created_at DESC LIMIT ?', (limit,)).fetchall()
-            result = []
-            for bill in bills:
-                bill_dict = dict(bill)
-                bill_dict['items'] = json.loads(bill_dict['items_json'])
-                del bill_dict['items_json']
-                result.append(bill_dict)
-            return result
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id, bill_number, patient_name, opd_number, total_amount, items_json, created_at
+                FROM bills ORDER BY created_at DESC LIMIT ?
+            ''', (limit,))
+            
+            bills = []
+            for row in cursor.fetchall():
+                bills.append({
+                    'id': row[0],
+                    'bill_number': row[1],
+                    'patient_name': row[2],
+                    'opd_number': row[3],
+                    'total_amount': row[4],
+                    'items': json.loads(row[5]) if row[5] else [],
+                    'created_at': row[6]
+                })
+            
+            conn.close()
+            return bills
+        except Exception as e:
+            logger.error(f"Error getting bills: {e}")
+            raise
     
-    def get_statistics(self):
+    def get_statistics(self) -> Dict:
         """Get database statistics"""
-        with self.get_db_connection() as conn:
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
             stats = {}
             
             # Total items by category
-            categories = conn.execute('SELECT category, COUNT(*) as count FROM items GROUP BY category').fetchall()
-            stats['items_by_category'] = {row['category']: row['count'] for row in categories}
+            cursor.execute('SELECT category, COUNT(*) FROM items GROUP BY category')
+            stats['items_by_category'] = {row[0]: row[1] for row in cursor.fetchall()}
             
             # Total items
-            total_items = conn.execute('SELECT COUNT(*) as count FROM items').fetchone()
-            stats['total_items'] = total_items['count']
+            cursor.execute('SELECT COUNT(*) FROM items')
+            stats['total_items'] = cursor.fetchone()[0]
             
             # Total bills
-            total_bills = conn.execute('SELECT COUNT(*) as count FROM bills').fetchone()
-            stats['total_bills'] = total_bills['count']
+            cursor.execute('SELECT COUNT(*) FROM bills')
+            stats['total_bills'] = cursor.fetchone()[0]
             
             # Revenue statistics
-            revenue = conn.execute('SELECT SUM(total_amount) as total FROM bills').fetchone()
-            stats['total_revenue'] = revenue['total'] or 0
+            cursor.execute('SELECT COALESCE(SUM(total_amount), 0) FROM bills')
+            stats['total_revenue'] = cursor.fetchone()[0]
             
+            conn.close()
             return stats
+        except Exception as e:
+            logger.error(f"Error getting statistics: {e}")
+            raise
+    
+    def get_connection_info(self) -> Dict:
+        """Get database connection information"""
+        return {
+            'connected': self.connected,
+            'database_type': 'SQLite',
+            'database_path': self.db_path
+        }
 
 # Global database instance
-db = FlaskHospitalDB()
+db = HospitalDB()
